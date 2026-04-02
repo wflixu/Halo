@@ -23,15 +23,11 @@ pub struct Context {
   state : Map[String, String];
 }
 
-/// Next function wrapper - holds a function that can be called
-pub struct Next {
-  dummy : Int
-}
+/// Next function type - calls the next middleware in chain
+pub type Next = () -> Unit
 
-/// Middleware wrapper
-pub struct Middleware {
-  dummy : Int
-}
+/// Middleware type - takes context and next function
+pub type Middleware = (Context, Next) -> Unit
 
 /// Helper to create context for testing
 pub fn make_context() -> Context {
@@ -40,12 +36,7 @@ pub fn make_context() -> Context {
   { req : req, res : res, state : Map::new() }
 }
 
-/// Helper to create a next function
+/// Helper to create a no-op next function
 pub fn make_next() -> Next {
-  Next::new()
-}
-
-/// Constructor for Next
-pub fn Next::new() -> Next {
-  { dummy : 0 }
+  fn() { }
 }
