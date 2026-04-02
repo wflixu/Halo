@@ -1,11 +1,7 @@
 // examples/moon.pkg - Package configuration for examples
 import {
-  "wflixu/Halo/src/halo",
+  "wflixu/Halo/halo",
 }
-
-options(
-  "is-main": true,
-)
 
 options(
   "is-main": true,

@@ -1,0 +1,28 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "wflixu/Halo/src/halo/http"
+
+import {
+  "wflixu/Halo/src/halo",
+}
+
+// Values
+pub fn apply_to_response(@halo.Response, (Int) -> Unit, (String, String) -> Unit, (String) -> Unit) -> Unit
+
+pub fn wrap_request(String, String, Map[String, String], String?) -> @halo.Request
+
+pub fn wrap_response(Int, Map[String, String]) -> @halo.Response
+
+// Errors
+
+// Types and methods
+pub struct Server {
+  address : String
+}
+pub fn Server::get_address(Self) -> String
+pub fn Server::new(String) -> Self
+pub fn Server::start((@halo.Request) -> @halo.Response) -> Unit
+
+// Type aliases
+
+// Traits
+
