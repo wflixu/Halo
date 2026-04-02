@@ -42,8 +42,8 @@ test "wrap_response creates Response with correct status" {
   headers["Content-Type"] = "text/html"
   let res = wrap_response(200, headers)
 
-  assert_eq(res.status, 200)
-  assert_eq(res.headers["Content-Type"], "text/html")
+  assert_eq(res.status.val, 200)
+  assert_eq(res.headers.val["Content-Type"], "text/html")
 }
 
 test "wrap_response handles different status codes" {
@@ -51,8 +51,8 @@ test "wrap_response handles different status codes" {
   let res_404 = wrap_response(404, headers)
   let res_500 = wrap_response(500, headers)
 
-  assert_eq(res_404.status, 404)
-  assert_eq(res_500.status, 500)
+  assert_eq(res_404.status.val, 404)
+  assert_eq(res_500.status.val, 500)
 }
 
 test "apply_to_response sets status" {

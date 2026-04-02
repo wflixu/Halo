@@ -8,14 +8,14 @@ pub fn wrap_response(status : Int, headers : Map[String, String]) -> @halo.Respo
 
 /// Apply our Response to raw HTTP response setters
 pub fn apply_to_response(res : @halo.Response, set_status_fn : (Int) -> Unit, set_header_fn : (String, String) -> Unit, set_body_fn : (String) -> Unit) -> Unit {
-  set_status_fn(res.status)
+  set_status_fn(res.status.val)
 
-  for k in res.headers.keys() {
-    let value = res.headers[k]
+  for k in res.headers.val.keys() {
+    let value = res.headers.val[k]
     set_header_fn(k, value)
   }
 
-  match res.body {
+  match res.body.val {
     Some(body) => set_body_fn(body)
     None => ()
   }

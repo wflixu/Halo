@@ -41,6 +41,6 @@ fn App::callback(self : App) -> (Request) -> Response {
     // Create new context with updated req (structs are immutable)
     let ctx_with_req = { req: req, res: ctx.res, state: ctx.state }
     composed(ctx_with_req, make_next())
-    ctx_with_req.res
+    ctx_with_req.res.val
   }
 }
