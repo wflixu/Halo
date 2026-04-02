@@ -353,3 +353,92 @@ fn main {
   app.listen(":3000")
 }
 ```
+
+---
+
+## 11. Built-in Middleware Ecosystem
+
+Halo 提供开箱即用的内置中间件，覆盖 80% 的常见 Web 开发需求。
+
+### 11.1 Middleware Layers
+
+| Layer | Version | Middleware | Description |
+|-------|---------|------------|-------------|
+| **Core** | v0.3 | `logger`, `error_handler`, `cors`, `static` | 每个应用都需要 |
+| **Common** | v0.4 | `body_parser`, `cookie`, `session`, `secure_headers` | 80% 应用需要 |
+| **Advanced** | v0.5+ | `rate_limit`, `compression`, `etag`, `request_id`, `auth_jwt` | 高级场景 |
+
+### 11.2 Middleware Directory Structure
+
+```
+halo/
+├── middleware/              # 内置中间件集合
+│   ├── moon.pkg
+│   ├── logger.mbt           # 请求日志
+│   ├── error_handler.mbt    # 统一错误处理
+│   ├── cors.mbt             # 跨域资源共享
+│   ├── static.mbt           # 静态文件服务
+│   ├── body_parser.mbt      # 请求体解析
+│   ├── cookie.mbt           # Cookie 解析
+│   ├── session.mbt          # 会话管理
+│   ├── secure_headers.mbt   # 安全响应头
+│   ├── rate_limit.mbt       # 请求限流
+│   └── compression.mbt      # 响应压缩
+```
+
+### 11.3 API Design Pattern
+
+```moonbit
+use halo/middleware
+
+// 零配置默认使用
+app.add_middleware(@middleware.logger())
+app.add_middleware(@middleware.error_handler())
+app.add_middleware(@middleware.cors())
+
+// 自定义配置
+app.add_middleware(@middleware.cors.allow_origins(["https://example.com"]))
+app.add_middleware(@middleware.static("./public", prefix="/assets"))
+app.add_middleware(@middleware.rate_limit.ip_based(100, 60))  // 100 次/分钟
+```
+
+### 11.4 Recommended Presets
+
+**最小化 API 模板：**
+```moonbit
+let app = App::new()
+app.add_middleware(@middleware.logger())
+app.add_middleware(@middleware.error_handler())
+app.add_middleware(@middleware.cors())
+app.add_middleware(router)
+```
+
+**完整 Web 应用模板：**
+```moonbit
+let app = App::new()
+
+// 基础中间件
+app.add_middleware(@middleware.logger())
+app.add_middleware(@middleware.error_handler())
+app.add_middleware(@middleware.cors())
+app.add_middleware(@middleware.secure_headers())
+
+// 请求处理
+app.add_middleware(@middleware.body_parser())
+app.add_middleware(@middleware.cookie_parser())
+app.add_middleware(@middleware.session())
+
+// 静态文件
+app.add_middleware(@middleware.static("./public"))
+
+// 路由
+app.add_middleware(router)
+```
+
+### 11.5 Design Principles
+
+1. **零配置可用** - 默认配置就能用
+2. **可组合** - 中间件可以叠加
+3. **类型安全** - 返回类型明确
+4. **性能优先** - 高频中间件（如 logger）要高效
+5. **不依赖外部库** - 全部内置，避免依赖地狱

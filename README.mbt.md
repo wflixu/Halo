@@ -162,14 +162,13 @@ Halo is not about copying Koa — it's about building a more modern middleware r
 
 ```
 halo/
-├── types.mb         # Core type definitions
-├── compose.mb       # Middleware composition
-├── app.mb           # Application entry
-├── context.mb       # Context implementation
+├── types.mbt              # Core type definitions
+├── compose.mbt            # Middleware composition
+├── app.mbt                # Application entry
 └── http/
-    ├── server.mb    # HTTP server wrapper
-    ├── request.mb   # Request wrapper
-    └── response.mb  # Response wrapper
+    ├── server.mbt         # HTTP server wrapper
+    ├── request.mbt        # Request wrapper
+    └── response.mbt       # Response wrapper
 ```
 
 ---
@@ -178,9 +177,50 @@ halo/
 
 | Version | Features |
 |---------|----------|
-| v0.1 | middleware engine, http server, context, basic response |
-| v0.2 | router, path params, static files |
-| v0.3 | middleware ecosystem (logging, cors, proxy) |
+| **v0.1** ✅ | middleware engine, http server, context, basic response |
+| **v0.2** 📋 | router, path params (`:id`), wildcards (`*`), route groups |
+| **v0.3** 📋 | built-in middleware: logger, error_handler, cors, static |
+| **v0.4** 📋 | body_parser, cookie, session, secure_headers |
+| **v0.5** 🔮 | rate_limit, compression, etag, auth_jwt |
+
+See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
+
+---
+
+## 🧰 Built-in Middleware (Coming Soon)
+
+Halo provides zero-config middleware for common web development needs:
+
+```moonbit
+use wflixu/Halo/halo
+use wflixu/Halo/halo/middleware
+
+let app = @halo.App::new()
+
+// Core middleware (every app needs these)
+app.add_middleware(@middleware.logger())
+app.add_middleware(@middleware.error_handler())
+app.add_middleware(@middleware.cors())
+
+// Request processing
+app.add_middleware(@middleware.body_parser())
+app.add_middleware(@middleware.session())
+
+// Static files
+app.add_middleware(@middleware.static("./public"))
+```
+
+**Available in v0.3+:**
+- `logger` - Request logging
+- `error_handler` - Unified error handling
+- `cors` - Cross-origin requests
+- `static` - Static file serving
+
+**Planned for v0.4+:**
+- `body_parser` - JSON/Form parsing
+- `cookie` / `session` - Session management
+- `secure_headers` - Security headers
+- `rate_limit` - Request throttling
 
 ---
 
