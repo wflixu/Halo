@@ -1,0 +1,4 @@
+// src/halo/http/moon.pkg - Package configuration for halo/http
+import {
+  "wflixu/Halo/src/halo",
+}
