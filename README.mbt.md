@@ -161,14 +161,43 @@ Halo is not about copying Koa — it's about building a more modern middleware r
 ## 📁 Project Structure
 
 ```
-halo/
-├── types.mbt              # Core type definitions
-├── compose.mbt            # Middleware composition
-├── app.mbt                # Application entry
-└── http/
-    ├── server.mbt         # HTTP server wrapper
-    ├── request.mbt        # Request wrapper
-    └── response.mbt       # Response wrapper
+wflixu/Halo/
+├── moon.mod.json              # Module definition
+├── halo/                      # Core package (v0.1 ✅)
+│   ├── moon.pkg
+│   ├── types.mbt              # Context, Request, Response, Middleware
+│   ├── compose.mbt            # Onion model composition
+│   ├── app.mbt                # App::new(), add_middleware(), listen()
+│   ├── app_test.mbt           # Tests
+│   └── http/                  # HTTP wrappers (v0.1 ✅)
+│       ├── moon.pkg
+│       ├── server.mbt
+│       ├── request.mbt
+│       ├── response.mbt
+│       └── http_test.mbt
+├── halo/router/               # Router middleware (v0.2 📋)
+│   ├── moon.pkg
+│   ├── router.mbt             # Router, route groups
+│   ├── matcher.mbt            # Path matching (:param, *)
+│   └── router_test.mbt
+├── halo/middleware/           # Built-in middleware (v0.3+ 📋)
+│   ├── moon.pkg
+│   ├── logger.mbt             # Request logging
+│   ├── error_handler.mbt      # Unified error handling
+│   ├── cors.mbt               # Cross-origin
+│   ├── static.mbt             # Static files
+│   ├── body_parser.mbt        # JSON/Form parsing (v0.4)
+│   ├── cookie.mbt             # Cookie parsing (v0.4)
+│   ├── session.mbt            # Session management (v0.4)
+│   ├── secure_headers.mbt     # Security headers (v0.4)
+│   ├── rate_limit.mbt         # Rate limiting (v0.5)
+│   └── compression.mbt        # gzip/brotli (v0.5)
+├── examples/                  # Examples
+│   ├── moon.pkg
+│   └── demo.mbt
+└── cmd/main/                  # CLI entry
+    ├── moon.pkg
+    └── main.mbt
 ```
 
 ---
