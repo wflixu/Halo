@@ -12,7 +12,7 @@ pub fn App::new() -> App {
 
 /// Add middleware to the app
 /// Returns self for method chaining
-pub fn App::use(self : App, mw : Middleware) -> App {
+pub fn App::add_middleware(self : App, mw : Middleware) -> App {
   let middlewares = self.middlewares
   middlewares.push(mw)
   { middlewares : middlewares }
@@ -24,11 +24,11 @@ pub fn App::middleware_count(self : App) -> Int {
 }
 
 /// Start the server with the given address
-pub fn App::listen(self : App, address : String) -> Unit {
+pub fn App::listen(self : App, _address : String) -> Unit {
   let handler = self.callback()
   // The handler can be passed to Server::start from the http package
   // For now, just print the address to indicate the server would start
-  println("Server would start on {address}")
+  println("Server would start on {_address}")
   let _ = handler
 }
 

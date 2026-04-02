@@ -18,9 +18,9 @@ pub fn Server::get_address(self : Server) -> String {
 
 /// Start the server with the given handler function
 /// The handler takes a Request and returns a Response
-pub fn Server::start(handler : (@halo.Request) -> @halo.Response) -> Unit {
+pub fn Server::start(_handler : (@halo.Request) -> @halo.Response) -> Unit {
   // This is a simplified wrapper
   // In a real implementation, this would use MoonBit's HTTP primitives
   // to listen on the address and call the handler for each request
-  println("Starting server on {address}")
+  println("Starting server on {self.address}")
 }

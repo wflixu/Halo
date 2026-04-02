@@ -4,14 +4,14 @@ fn main {
   let app = @halo.App::new()
 
   // Logger middleware
-  ignore(app.use(fn(ctx, next) {
-    println("{ctx.req.http_method} {ctx.req.path}")
+  ignore(app.add_middleware(fn(_ctx, next) {
+    println("Request received")
     next()
-    println("Response: {ctx.res.val.status.val}")
+    println("Response sent")
   }))
 
   // Simple router
-  ignore(app.use(fn(ctx, _) {
+  ignore(app.add_middleware(fn(ctx, _) {
     if ctx.req.path == "/" {
       ctx.set_body("Hello from Halo!")
     } else if ctx.req.path == "/json" {
