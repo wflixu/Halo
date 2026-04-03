@@ -442,3 +442,167 @@ app.add_middleware(router)
 3. **类型安全** - 返回类型明确
 4. **性能优先** - 高频中间件（如 logger）要高效
 5. **不依赖外部库** - 全部内置，避免依赖地狱
+
+---
+
+## 12. Server-Sent Events (SSE) Support
+
+### 12.1 Overview
+
+SSE (Server-Sent Events) 是一种单向服务器到客户端的实时通信协议，基于 HTTP，天然支持断线重连。
+
+**使用场景：**
+- 实时通知推送
+- 股票行情/数据流
+- 构建日志/进度实时更新
+- AI 流式响应（如 LLM token 流）
+
+### 12.2 API Design
+
+```moonbit
+use halo/helper/sse
+
+// 方式 1: SSE Helper
+app.add_middleware(@helper.sse.emit(ctx, "notification", "{\"msg\": \"Hello\"}"))
+
+// 方式 2: Stream response
+app.add_middleware(fn(ctx, next) {
+  if ctx.req.path == "/stream" {
+    @helper.sse.set_headers(ctx)  // 设置 SSE 响应头
+    @helper.sse.send(ctx, "start", "{\"status\": \"connected\"}")
+    
+    // 流式发送事件
+    for i in 1..10 {
+      @helper.sse.send(ctx, "progress", "{\"count\": " + Int::to_string(i) + "}")
+    }
+    
+    @helper.sse.send(ctx, "end", "{\"status\": \"complete\"}")
+    return
+  }
+  next()
+})
+```
+
+### 12.3 SSE Response Format
+
+SSE 事件格式（每行一个字段，双换行分隔事件）：
+
+```
+event: notification
+data: {"msg": "Hello"}
+
+event: progress
+data: {"count": 1}
+id: 1
+retry: 3000
+```
+
+### 12.4 Module Design
+
+```
+halo/
+└── helper/
+    ├── moon.pkg
+    └── sse.mbt           # SSE helper functions
+```
+
+### 12.5 Core Functions
+
+```moonbit
+/// Set SSE response headers
+/// Content-Type: text/event-stream
+/// Cache-Control: no-cache
+/// Connection: keep-alive
+pub fn set_headers(ctx : Context) -> Unit
+
+/// Send SSE event with default event type "message"
+pub fn send(ctx : Context, data : String) -> Unit
+
+/// Send SSE event with custom event type
+pub fn send_event(ctx : Context, event : String, data : String) -> Unit
+
+/// Send SSE event with ID (for reconnection)
+pub fn send_with_id(ctx : Context, event : String, data : String, id : String) -> Unit
+
+/// Send SSE event with retry interval (milliseconds)
+pub fn send_with_retry(ctx : Context, event : String, data : String, retry_ms : Int) -> Unit
+
+/// Flush response buffer (ensure client receives immediately)
+pub fn flush(ctx : Context) -> Unit
+```
+
+### 12.6 Implementation Notes
+
+1. **流式响应** - SSE 需要流式支持，Response 需要 body_stream 字段
+2. **缓冲刷新** - 每次 send 后需要 flush 确保客户端立即收到
+3. **长连接** - SSE 是长连接，需要保持连接不被中间件截断
+4. **错误处理** - 客户端断线检测（可选）
+
+### 12.7 Usage Example
+
+```moonbit
+// examples/sse_demo.mbt
+use halo/app
+use halo/helper/sse
+
+fn main {
+  let app = @halo.App::new()
+
+  app.add_middleware(@middleware.logger())
+  app.add_middleware(@middleware.cors_allow_all())
+
+  // SSE endpoint
+  app.add_middleware(fn(ctx, _) {
+    if ctx.req.path == "/events" {
+      @helper.sse.set_headers(ctx)
+      @helper.flush(ctx)
+
+      let count = 5
+      let mut i = 0
+      while i < count {
+        let data = "{\"count\": " + Int::to_string(i) + "}"
+        @helper.sse.send_event(ctx, "progress", data)
+        @helper.flush(ctx)
+        i = i + 1
+      }
+
+      @helper.sse.send_event(ctx, "end", "{\"status\": \"done\"}")
+      return
+    }
+
+    // HTML page with EventSource
+    if ctx.req.path == "/" {
+      ctx.set_body(html_page())
+      return
+    }
+
+    ctx.set_status(404)
+  })
+
+  app.listen(":3000")
+}
+
+fn html_page() -> String {
+  \"\"\"
+  <!DOCTYPE html>
+  <html>
+  <body>
+    <div id="events"></div>
+    <script>
+      const es = new EventSource("/events");
+      es.onmessage = (e) => {
+        document.getElementById("events").innerHTML += e.data + "<br>";
+      };
+    </script>
+  </body>
+  </html>
+  \"\"\"
+}
+```
+
+### 12.8 Future Extensions
+
+1. **SSE Middleware** - 自动管理连接生命周期
+2. **Broadcast** - 多客户端广播支持
+3. **Room/Channel** - 房间/频道订阅模式
+4. **Reconnection** - 断线重连事件 ID 管理

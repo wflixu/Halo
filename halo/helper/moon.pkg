@@ -1,0 +1,4 @@
+// halo/helper/moon.pkg - Package configuration for helper modules
+import {
+  "wflixu/Halo/halo",
+}
