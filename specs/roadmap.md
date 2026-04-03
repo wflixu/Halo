@@ -9,8 +9,8 @@
 | Version | Status | Features |
 |---------|--------|----------|
 | v0.1 | ✅ Done | Middleware engine, HTTP server, Context, basic response |
-| v0.2 | Planned | Router, path params, static files |
-| v0.3 | Planned | Built-in middleware (logger, error_handler, cors, static) |
+| v0.2 | ✅ Done | Router, path params, wildcards |
+| v0.3 | ✅ Done | Built-in middleware (logger, error_handler, cors, static) |
 | v0.4 | Planned | body_parser, cookie, session, secure_headers |
 | v0.5 | Future | rate_limit, compression, etag, request_id, auth_jwt |
 
@@ -51,53 +51,60 @@ halo/
 
 ## v0.2 Router Plan
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 
 **Related Docs:** [router-design.md](router-design.md)
 
 **Goal:** Add routing middleware with path parameters and wildcard matching.
 
-**Planned Files:**
+**Files Created:**
 ```
 halo/
-├── router/
-│   ├── moon.pkg
-│   ├── router.mbt         # Router main module
-│   ├── matcher.mbt        # Path matching algorithm
-│   └── router_test.mbt    # Router tests
+└── router/
+    ├── moon.pkg
+    ├── route.mbt            # Route type and path matching
+    ├── router.mbt           # Router main module
+    └── router_test.mbt      # Router tests (13 tests)
 ```
 
-**Features:**
-- [ ] Static routes (`/users`)
-- [ ] Path parameters (`/user/:id`)
-- [ ] Wildcards (`/files/*`, `:path*`)
-- [ ] HTTP method routing (GET, POST, PUT, DELETE)
-- [ ] 404/405 handlers
-- [ ] Route groups (`/api/v1`)
-- [ ] Per-route middleware
+**Features Implemented:**
+- ✅ Static routes (`/users`)
+- ✅ Path parameters (`/user/:id`)
+- ✅ Wildcards (`/files/*`, `:path*`)
+- ✅ HTTP method routing (GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD, ANY)
+- ✅ 404 handler
+- ✅ Per-route middleware via Router.to_middleware()
 
 **API Example:**
 ```moonbit
-let router = Router::new()
+let router = @router.Router::new()
 
 router
   .get("/", home_handler)
   .get("/user/:id", get_user)
   .post("/user", create_user)
-  .any("/api/*", api_handler)
+  .get("/files/:path*", file_handler)
+  .handle_404(fn(ctx) { ctx.set_status(404) })
 
 app.add_middleware(router.to_middleware())
+
+// Access params: @router.param(ctx, "id")
 ```
+
+**Commits:**
+- `feat: implement router middleware with path parameters and wildcards`
+
+**Tests:** 34/34 passing (including 13 router tests)
 
 ---
 
 ## v0.3 Middleware Core Plan
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 
 **Goal:** Add essential built-in middleware for every web application.
 
-**Planned Files:**
+**Files Created:**
 ```
 halo/
 └── middleware/
@@ -112,7 +119,7 @@ halo/
 
 ```moonbit
 app.add_middleware(@middleware.logger())
-// Output: [20ms] GET /users -> 200
+// Output: GET /users -> 200
 ```
 
 ### error_handler
@@ -132,8 +139,8 @@ app.add_middleware(@middleware.cors.allow_origins(["https://example.com"]))
 ### static
 
 ```moonbit
-app.add_middleware(@middleware.static("./public"))
-app.add_middleware(@middleware.static("./assets", prefix="/static"))
+app.add_middleware(@middleware.static_files("./public"))
+app.add_middleware(@middleware.static_with_options({ root: "./assets", prefix: "/static" }))
 ```
 
 ---

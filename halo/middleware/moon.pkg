@@ -1,0 +1,4 @@
+// halo/middleware/moon.pkg - Package configuration for middleware
+import {
+  "wflixu/Halo/halo",
+}
