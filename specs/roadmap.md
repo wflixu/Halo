@@ -11,7 +11,7 @@
 | v0.1 | ✅ Done | Middleware engine, HTTP server, Context, basic response |
 | v0.2 | ✅ Done | Router, path params, wildcards |
 | v0.3 | ✅ Done | Built-in middleware (logger, error_handler, cors, static) |
-| v0.4 | Planned | body_parser, cookie, session, secure_headers |
+| v0.4 | ✅ Done | body_parser, cookie, session, secure_headers |
 | v0.5 | Future | rate_limit, compression, etag, request_id, auth_jwt |
 
 ---
@@ -147,16 +147,16 @@ app.add_middleware(@middleware.static_with_options({ root: "./assets", prefix: "
 
 ## v0.4 Middleware Common Plan
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 
 **Goal:** Add commonly-used middleware for 80% of web applications.
 
-**Planned Files:**
+**Files Created:**
 ```
 halo/
 └── middleware/
     ├── body_parser.mbt      # Request body parsing
-    ├── cookie.mbt           # Cookie parsing
+    ├── cookie_parser.mbt    # Cookie parsing
     ├── session.mbt          # Session management
     └── secure_headers.mbt   # Security headers
 ```
@@ -167,8 +167,8 @@ halo/
 app.add_middleware(@middleware.body_parser())
 
 // In handler:
-let json_data = ctx.body.json
-let form_data = ctx.body.form
+let json_data = @middleware.get_json(ctx)
+let form_value = @middleware.get_form_field(ctx, "username")
 ```
 
 ### cookie_parser
@@ -177,7 +177,8 @@ let form_data = ctx.body.form
 app.add_middleware(@middleware.cookie_parser())
 
 // In handler:
-let token = ctx.cookies["token"]
+let token = @middleware.get_cookie(ctx, "token")
+@middleware.set_cookie(ctx, "session", "abc123")
 ```
 
 ### session
@@ -186,15 +187,15 @@ let token = ctx.cookies["token"]
 app.add_middleware(@middleware.session())
 
 // In handler:
-ctx.session["user_id"] = "123"
-let user_id = ctx.session["user_id"]
+@middleware.session_set(ctx, "user_id", "123")
+let user_id = @middleware.session_get(ctx, "user_id")
 ```
 
 ### secure_headers
 
 ```moonbit
 app.add_middleware(@middleware.secure_headers())
-// Sets: X-Frame-Options, X-Content-Type-Options, etc.
+// Sets: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, HSTS
 ```
 
 ---

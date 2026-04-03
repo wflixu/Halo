@@ -23,9 +23,9 @@ fn default_cors_options() -> CorsOptions {
 ///
 /// Example:
 /// ```moonbit
-/// app.add_middleware(@middleware.cors.allow_all())
+/// app.add_middleware(@middleware.cors_allow_all())
 /// ```
-pub fn allow_all() -> @halo.Middleware {
+pub fn cors_allow_all() -> @halo.Middleware {
   cors_with_options(default_cors_options())
 }
 
@@ -33,9 +33,9 @@ pub fn allow_all() -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit
-/// app.add_middleware(@middleware.cors.allow_origins(["https://example.com"]))
+/// app.add_middleware(@middleware.cors_allow_origins(["https://example.com"]))
 /// ```
-pub fn allow_origins(origins : Array[String]) -> @halo.Middleware {
+pub fn cors_allow_origins(origins : Array[String]) -> @halo.Middleware {
   cors_with_options({
     allow_origins: origins,
     allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
