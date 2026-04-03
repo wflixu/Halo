@@ -1,26 +1,26 @@
 // halo/middleware/request_id.mbt
 // Request ID middleware - adds unique ID to each request for tracing
 
+///|
 /// Request ID middleware options
 pub struct RequestIdOptions {
   /// Header name for request ID (default: "X-Request-ID")
   header_name : String
   /// Generate custom ID (if None, use default generator)
-  generator : Option[() -> String]
+  generator : (() -> String)?
 }
 
+///|
 /// Default request ID options
 fn default_request_id_options() -> RequestIdOptions {
-  {
-    header_name: "X-Request-ID",
-    generator: None,
-  }
+  { header_name: "X-Request-ID", generator: None }
 }
 
+///|
 /// Request ID middleware - adds unique ID to each request
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.request_id())
 ///
 /// // In handler:
@@ -30,6 +30,7 @@ pub fn request_id() -> @halo.Middleware {
   request_id_with_options(default_request_id_options())
 }
 
+///|
 /// Request ID middleware with custom options
 pub fn request_id_with_options(options : RequestIdOptions) -> @halo.Middleware {
   fn(ctx : @halo.Context, next : @halo.Next) {
@@ -49,15 +50,17 @@ pub fn request_id_with_options(options : RequestIdOptions) -> @halo.Middleware {
   }
 }
 
+///|
 /// Generate a unique request ID
 fn generate_request_id() -> String {
   // Simple UUID-like format: timestamp + random
-  let ts = "1234567890"  // In real implementation: Int::to_string(os::time())
+  let ts = "1234567890" // In real implementation: Int::to_string(os::time())
   let rand = "abcd"
   "req_" + ts + "_" + rand
 }
 
+///|
 /// Get request ID from context
-pub fn get_request_id(ctx : @halo.Context) -> Option[String] {
+pub fn get_request_id(ctx : @halo.Context) -> String? {
   ctx.state.get("request_id")
 }

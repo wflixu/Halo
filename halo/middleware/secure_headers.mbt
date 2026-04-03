@@ -1,15 +1,17 @@
 // halo/middleware/secure_headers.mbt
 // Security headers middleware
 
+///|
 /// Security headers options
 pub struct SecureHeadersOptions {
   x_frame_options : String
   x_content_type_options : String
   x_xss_protection : String
   strict_transport_security : String
-  content_security_policy : Option[String]
+  content_security_policy : String?
 }
 
+///|
 /// Default security headers options
 fn default_secure_headers_options() -> SecureHeadersOptions {
   {
@@ -21,18 +23,22 @@ fn default_secure_headers_options() -> SecureHeadersOptions {
   }
 }
 
+///|
 /// Secure headers middleware - adds security-related HTTP headers
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.secure_headers())
 /// ```
 pub fn secure_headers() -> @halo.Middleware {
   secure_headers_with_options(default_secure_headers_options())
 }
 
+///|
 /// Secure headers middleware with custom options
-pub fn secure_headers_with_options(options : SecureHeadersOptions) -> @halo.Middleware {
+pub fn secure_headers_with_options(
+  options : SecureHeadersOptions,
+) -> @halo.Middleware {
   fn(ctx : @halo.Context, next : @halo.Next) {
     let headers = ctx.res.val.headers.val
 
@@ -50,8 +56,8 @@ pub fn secure_headers_with_options(options : SecureHeadersOptions) -> @halo.Midd
 
     // Content-Security-Policy - optional CSP
     match options.content_security_policy {
-      Some(csp) => { headers["Content-Security-Policy"] = csp }
-      None => { ignore(0) }
+      Some(csp) => headers["Content-Security-Policy"] = csp
+      None => ignore(0)
     }
 
     next()

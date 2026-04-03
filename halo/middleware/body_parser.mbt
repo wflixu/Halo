@@ -1,11 +1,12 @@
 // halo/middleware/body_parser.mbt
 // Request body parsing middleware
 
+///|
 /// Body parser middleware - parses JSON and form bodies
 /// Stores raw body in ctx.state["body"] and parsed JSON in ctx.state["json"]
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.body_parser())
 ///
 /// // In handler:
@@ -23,30 +24,29 @@ pub fn body_parser() -> @halo.Middleware {
 
         // Parse JSON
         match content_type {
-          Some(ct) => {
+          Some(ct) =>
             if String::has_prefix(ct, "application/json") {
               ctx.state["json"] = raw
-            }
-            else if String::has_prefix(ct, "application/x-www-form-urlencoded") {
+            } else if String::has_prefix(
+                ct, "application/x-www-form-urlencoded",
+              ) {
               let form = parse_form(raw)
               // Store form fields as individual state entries
               for key in Map::keys(form) {
                 ignore(ctx.state.set("form:" + key, form[key]))
               }
             }
-          }
-          None => { ignore(0) }
+          None => ignore(0)
         }
       }
-      None => {
-        ctx.state["body"] = ""
-      }
+      None => ctx.state["body"] = ""
     }
 
     next()
   }
 }
 
+///|
 /// Parse form-encoded string into Map
 fn parse_form(body : String) -> Map[String, String] {
   let form : Map[String, String] = Map::new()
@@ -71,17 +71,20 @@ fn parse_form(body : String) -> Map[String, String] {
   form
 }
 
+///|
 /// Helper to get raw body string
-pub fn get_body(ctx : @halo.Context) -> Option[String] {
+pub fn get_body(ctx : @halo.Context) -> String? {
   ctx.state.get("body")
 }
 
+///|
 /// Helper to get JSON body string
-pub fn get_json(ctx : @halo.Context) -> Option[String] {
+pub fn get_json(ctx : @halo.Context) -> String? {
   ctx.state.get("json")
 }
 
+///|
 /// Helper to get form field value
-pub fn get_form_field(ctx : @halo.Context, field : String) -> Option[String] {
+pub fn get_form_field(ctx : @halo.Context, field : String) -> String? {
   ctx.state.get("form:" + field)
 }

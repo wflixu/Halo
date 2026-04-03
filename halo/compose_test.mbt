@@ -1,16 +1,17 @@
 // src/halo/compose_test.mbt
 // Blackbox tests for middleware composition engine
 
+///|
 test "compose executes middleware in order" {
-  let order : Ref[Array[String]] = { val : [] }
+  let order : Ref[Array[String]] = { val: [] }
 
-  let mw1 = fn(_ctx: Context, next: Next) {
+  let mw1 = fn(_ctx : Context, next : Next) {
     let _ = order.val.push("mw1-before")
     next()
     let _ = order.val.push("mw1-after")
   }
 
-  let mw2 = fn(_ctx: Context, next: Next) {
+  let mw2 = fn(_ctx : Context, next : Next) {
     let _ = order.val.push("mw2-before")
     next()
     let _ = order.val.push("mw2-after")
@@ -28,6 +29,7 @@ test "compose executes middleware in order" {
   assert_eq(order.val[3], "mw1-after")
 }
 
+///|
 test "compose handles empty middleware array" {
   let composed = compose([])
   let ctx = make_context()
@@ -36,16 +38,15 @@ test "compose handles empty middleware array" {
   composed(ctx, next)
 }
 
+///|
 test "middleware can short-circuit" {
-  let mw2_executed : Ref[Bool] = { val : false }
+  let mw2_executed : Ref[Bool] = { val: false }
 
-  let mw1 = fn(_ctx: Context, _next: Next) {
+  let mw1 = fn(_ctx : Context, _next : Next) {
     // Don't call next() - short-circuit
   }
 
-  let mw2 = fn(_ctx: Context, _next: Next) {
-    mw2_executed.val = true
-  }
+  let mw2 = fn(_ctx : Context, _next : Next) { mw2_executed.val = true }
 
   let composed = compose([mw1, mw2])
   let ctx = make_context()
@@ -56,16 +57,13 @@ test "middleware can short-circuit" {
   assert_eq(mw2_executed.val, false)
 }
 
+///|
 test "middleware chain calls next at the end" {
-  let final_next_called : Ref[Bool] = { val : false }
+  let final_next_called : Ref[Bool] = { val: false }
 
-  let mw = fn(_ctx: Context, next: Next) {
-    next()
-  }
+  let mw = fn(_ctx : Context, next : Next) { next() }
 
-  let final_next = fn() {
-    final_next_called.val = true
-  }
+  let final_next = fn() { final_next_called.val = true }
 
   let composed = compose([mw])
   let ctx = make_context()

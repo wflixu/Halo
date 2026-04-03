@@ -1,26 +1,29 @@
 // halo/middleware/static.mbt
 // Static file serving middleware
 
+///|
 /// Static file middleware options
 pub struct StaticOptions {
   root : String
   prefix : String
 }
 
+///|
 /// Create static file middleware with default options (./public)
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.static_files("./public"))
 /// ```
 pub fn static_files(root : String) -> @halo.Middleware {
-  static_with_options({ root: root, prefix: "/" })
+  static_with_options({ root, prefix: "/" })
 }
 
+///|
 /// Create static file middleware with custom prefix
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.static_with_options({ root: "./assets", prefix: "/static" }))
 /// ```
 pub fn static_with_options(options : StaticOptions) -> @halo.Middleware {
@@ -29,7 +32,7 @@ pub fn static_with_options(options : StaticOptions) -> @halo.Middleware {
 
     // Check if path matches prefix
     let matches_prefix = options.prefix == "/" ||
-                         String::has_prefix(path, options.prefix)
+      String::has_prefix(path, options.prefix)
 
     if !matches_prefix {
       next()

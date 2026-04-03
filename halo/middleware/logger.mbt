@@ -1,10 +1,11 @@
 // halo/middleware/logger.mbt
 // Request logging middleware
 
+///|
 /// Logger middleware - logs method, path and status
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.logger())
 /// // Output: GET /users -> 200
 /// ```

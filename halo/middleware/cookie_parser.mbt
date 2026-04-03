@@ -1,10 +1,11 @@
 // halo/middleware/cookie_parser.mbt
 // Cookie parsing middleware
 
+///|
 /// Cookie parser middleware - parses Cookie header into ctx.state
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.cookie_parser())
 ///
 /// // In handler:
@@ -21,16 +22,16 @@ pub fn cookie_parser() -> @halo.Middleware {
           ignore(ctx.state.set("cookie:" + key, cookies[key]))
         }
       }
-      None => {
+      None =>
         // No cookies
         ignore(0)
-      }
     }
 
     next()
   }
 }
 
+///|
 /// Parse Cookie header string into Map
 fn parse_cookies(header : String) -> Map[String, String] {
   let cookies : Map[String, String] = Map::new()
@@ -59,45 +60,44 @@ fn parse_cookies(header : String) -> Map[String, String] {
   cookies
 }
 
+///|
 /// Helper to get cookie value
-pub fn get_cookie(ctx : @halo.Context, name : String) -> Option[String] {
+pub fn get_cookie(ctx : @halo.Context, name : String) -> String? {
   ctx.state.get("cookie:" + name)
 }
 
+///|
 /// Set cookie in response header
 pub fn set_cookie(ctx : @halo.Context, name : String, value : String) -> Unit {
   let cookie = name + "=" + value
   let existing = ctx.res.val.headers.val.get("Set-Cookie")
   match existing {
-    Some(e) => {
-      ctx.res.val.headers.val["Set-Cookie"] = e + "; " + cookie
-    }
-    None => {
-      ctx.res.val.headers.val["Set-Cookie"] = cookie
-    }
+    Some(e) => ctx.res.val.headers.val["Set-Cookie"] = e + "; " + cookie
+    None => ctx.res.val.headers.val["Set-Cookie"] = cookie
   }
 }
 
+///|
 /// Set cookie with options (path, max-age, etc.)
 pub fn set_cookie_with_options(
   ctx : @halo.Context,
   name : String,
   value : String,
-  path : Option[String],
-  max_age : Option[Int],
+  path : String?,
+  max_age : Int?,
   http_only : Bool,
-  secure : Bool
+  secure : Bool,
 ) -> Unit {
   let mut cookie = name + "=" + value
 
   match path {
-    Some(p) => { cookie = cookie + "; Path=" + p }
-    None => { ignore(0) }
+    Some(p) => cookie = cookie + "; Path=" + p
+    None => ignore(0)
   }
 
   match max_age {
-    Some(age) => { cookie = cookie + "; Max-Age=" + Int::to_string(age) }
-    None => { ignore(0) }
+    Some(age) => cookie = cookie + "; Max-Age=" + Int::to_string(age)
+    None => ignore(0)
   }
 
   if http_only {
@@ -110,15 +110,12 @@ pub fn set_cookie_with_options(
 
   let existing = ctx.res.val.headers.val.get("Set-Cookie")
   match existing {
-    Some(e) => {
-      ctx.res.val.headers.val["Set-Cookie"] = e + "; " + cookie
-    }
-    None => {
-      ctx.res.val.headers.val["Set-Cookie"] = cookie
-    }
+    Some(e) => ctx.res.val.headers.val["Set-Cookie"] = e + "; " + cookie
+    None => ctx.res.val.headers.val["Set-Cookie"] = cookie
   }
 }
 
+///|
 /// Delete cookie
 pub fn delete_cookie(ctx : @halo.Context, name : String) -> Unit {
   set_cookie_with_options(ctx, name, "", Some("/"), Some(0), true, false)

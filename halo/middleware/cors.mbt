@@ -1,6 +1,7 @@
 // halo/middleware/cors.mbt
 // Cross-Origin Resource Sharing (CORS) middleware
 
+///|
 /// CORS options
 pub struct CorsOptions {
   allow_origins : Array[String]
@@ -9,6 +10,7 @@ pub struct CorsOptions {
   max_age : Int
 }
 
+///|
 /// Default CORS options
 fn default_cors_options() -> CorsOptions {
   {
@@ -19,20 +21,22 @@ fn default_cors_options() -> CorsOptions {
   }
 }
 
+///|
 /// CORS middleware with allow all origins
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.cors_allow_all())
 /// ```
 pub fn cors_allow_all() -> @halo.Middleware {
   cors_with_options(default_cors_options())
 }
 
+///|
 /// CORS middleware with specific origins
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// app.add_middleware(@middleware.cors_allow_origins(["https://example.com"]))
 /// ```
 pub fn cors_allow_origins(origins : Array[String]) -> @halo.Middleware {
@@ -44,6 +48,7 @@ pub fn cors_allow_origins(origins : Array[String]) -> @halo.Middleware {
   })
 }
 
+///|
 /// CORS middleware with custom options
 pub fn cors_with_options(options : CorsOptions) -> @halo.Middleware {
   fn(ctx : @halo.Context, next : @halo.Next) {
@@ -55,13 +60,19 @@ pub fn cors_with_options(options : CorsOptions) -> @halo.Middleware {
 
     // Check if origin is allowed
     let is_allowed = Array::contains(options.allow_origins, "*") ||
-                     Array::contains(options.allow_origins, origin_str)
+      Array::contains(options.allow_origins, origin_str)
 
     if is_allowed {
       let headers = ctx.res.val.headers.val
       headers["Access-Control-Allow-Origin"] = origin_str
-      headers["Access-Control-Allow-Methods"] = Array::join(options.allow_methods, ", ")
-      headers["Access-Control-Allow-Headers"] = Array::join(options.allow_headers, ", ")
+      headers["Access-Control-Allow-Methods"] = Array::join(
+        options.allow_methods,
+        ", ",
+      )
+      headers["Access-Control-Allow-Headers"] = Array::join(
+        options.allow_headers,
+        ", ",
+      )
       headers["Access-Control-Max-Age"] = Int::to_string(options.max_age)
     }
 

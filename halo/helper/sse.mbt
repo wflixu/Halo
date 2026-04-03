@@ -1,6 +1,7 @@
 // halo/helper/sse.mbt
 // Server-Sent Events (SSE) helper functions
 
+///|
 /// Set SSE response headers
 /// Content-Type: text/event-stream
 /// Cache-Control: no-cache
@@ -13,13 +14,19 @@ pub fn sse_set_headers(ctx : @halo.Context) -> Unit {
   headers["Access-Control-Allow-Origin"] = "*"
 }
 
+///|
 /// Send SSE event with default event type "message"
 pub fn sse_send(ctx : @halo.Context, data : String) -> Unit {
   sse_send_event(ctx, "message", data)
 }
 
+///|
 /// Send SSE event with custom event type
-pub fn sse_send_event(ctx : @halo.Context, event : String, data : String) -> Unit {
+pub fn sse_send_event(
+  ctx : @halo.Context,
+  event : String,
+  data : String,
+) -> Unit {
   let event_line = "event: " + event
   let data_line = "data: " + data
   let message = event_line + "\n" + data_line + "\n\n"
@@ -27,17 +34,19 @@ pub fn sse_send_event(ctx : @halo.Context, event : String, data : String) -> Uni
   // Append to response body
   let existing = ctx.res.val.body.val
   match existing {
-    Some(body) => {
-      ctx.res.val.body.val = Some(body + message)
-    }
-    None => {
-      ctx.res.val.body.val = Some(message)
-    }
+    Some(body) => ctx.res.val.body.val = Some(body + message)
+    None => ctx.res.val.body.val = Some(message)
   }
 }
 
+///|
 /// Send SSE event with ID (for reconnection)
-pub fn sse_send_with_id(ctx : @halo.Context, event : String, data : String, id : String) -> Unit {
+pub fn sse_send_with_id(
+  ctx : @halo.Context,
+  event : String,
+  data : String,
+  id : String,
+) -> Unit {
   let event_line = "event: " + event
   let data_line = "data: " + data
   let id_line = "id: " + id
@@ -45,17 +54,19 @@ pub fn sse_send_with_id(ctx : @halo.Context, event : String, data : String, id :
 
   let existing = ctx.res.val.body.val
   match existing {
-    Some(body) => {
-      ctx.res.val.body.val = Some(body + message)
-    }
-    None => {
-      ctx.res.val.body.val = Some(message)
-    }
+    Some(body) => ctx.res.val.body.val = Some(body + message)
+    None => ctx.res.val.body.val = Some(message)
   }
 }
 
+///|
 /// Send SSE event with retry interval (milliseconds)
-pub fn sse_send_with_retry(ctx : @halo.Context, event : String, data : String, retry_ms : Int) -> Unit {
+pub fn sse_send_with_retry(
+  ctx : @halo.Context,
+  event : String,
+  data : String,
+  retry_ms : Int,
+) -> Unit {
   let event_line = "event: " + event
   let data_line = "data: " + data
   let retry_line = "retry: " + Int::to_string(retry_ms)
@@ -63,26 +74,19 @@ pub fn sse_send_with_retry(ctx : @halo.Context, event : String, data : String, r
 
   let existing = ctx.res.val.body.val
   match existing {
-    Some(body) => {
-      ctx.res.val.body.val = Some(body + message)
-    }
-    None => {
-      ctx.res.val.body.val = Some(message)
-    }
+    Some(body) => ctx.res.val.body.val = Some(body + message)
+    None => ctx.res.val.body.val = Some(message)
   }
 }
 
+///|
 /// Send raw SSE message (all fields already formatted)
 pub fn sse_send_raw(ctx : @halo.Context, message : String) -> Unit {
   let formatted = message + "\n\n"
 
   let existing = ctx.res.val.body.val
   match existing {
-    Some(body) => {
-      ctx.res.val.body.val = Some(body + formatted)
-    }
-    None => {
-      ctx.res.val.body.val = Some(formatted)
-    }
+    Some(body) => ctx.res.val.body.val = Some(body + formatted)
+    None => ctx.res.val.body.val = Some(formatted)
   }
 }

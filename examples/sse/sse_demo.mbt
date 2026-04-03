@@ -1,6 +1,7 @@
 // examples/sse_demo.mbt
 // Server-Sent Events (SSE) demo
 
+///|
 fn main {
   let app = @halo.App::new()
 
@@ -9,48 +10,53 @@ fn main {
   ignore(app.add_middleware(@middleware.cors_allow_all()))
 
   // SSE endpoint
-  ignore(app.add_middleware(fn(ctx, _) {
-    if ctx.req.path == "/events" {
-      @helper.sse_set_headers(ctx)
+  ignore(
+    app.add_middleware(fn(ctx, _) {
+      if ctx.req.path == "/events" {
+        @helper.sse_set_headers(ctx)
 
-      // Send initial connection message
-      @helper.sse_send_event(ctx, "connected", "{\"status\": \"connected\"}")
+        // Send initial connection message
+        @helper.sse_send_event(ctx, "connected", "{\"status\": \"connected\"}")
 
-      // Stream progress events
-      let count = 5
-      let mut i = 0
-      while i < count {
-        let data = "{\"count\": " + Int::to_string(i) + "}"
-        @helper.sse_send_event(ctx, "progress", data)
-        i = i + 1
+        // Stream progress events
+        let count = 5
+        let mut i = 0
+        while i < count {
+          let data = "{\"count\": " + Int::to_string(i) + "}"
+          @helper.sse_send_event(ctx, "progress", data)
+          i = i + 1
+        }
+
+        // Send completion message
+        @helper.sse_send_event(ctx, "complete", "{\"status\": \"done\"}")
+        return
       }
 
-      // Send completion message
-      @helper.sse_send_event(ctx, "complete", "{\"status\": \"done\"}")
-      return
-    }
+      // HTML page with EventSource client
+      if ctx.req.path == "/" {
+        ignore(ctx.set_body(html_page()))
+        return
+      }
 
-    // HTML page with EventSource client
-    if ctx.req.path == "/" {
-      ignore(ctx.set_body(html_page()))
-      return
-    }
+      // JSON API endpoint
+      if ctx.req.path == "/api/info" {
+        ignore(
+          ctx.set_json("{\"name\": \"Halo SSE Demo\", \"version\": \"0.5\"}"),
+        )
+        return
+      }
 
-    // JSON API endpoint
-    if ctx.req.path == "/api/info" {
-      ignore(ctx.set_json("{\"name\": \"Halo SSE Demo\", \"version\": \"0.5\"}"))
-      return
-    }
-
-    ctx.set_status(404)
-    ignore(ctx.set_body("Not Found"))
-  }))
+      ctx.set_status(404)
+      ignore(ctx.set_body("Not Found"))
+    }),
+  )
 
   println("Starting Halo SSE demo server on :3000")
   println("Open http://localhost:3000 in browser to see SSE events")
   app.listen(":3000")
 }
 
+///|
 /// HTML page with EventSource client
 fn html_page() -> String {
   "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Halo SSE Demo</title></head><body>" +

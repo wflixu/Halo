@@ -1,12 +1,15 @@
 // halo/router/route.mbt
 // Route definition and path matching
 
+///|
 /// HTTP methods supported by the router
 pub type HttpMethod = String
 
+///|
 /// Handler function type - same as Middleware signature
 pub type Handler = (@halo.Context, @halo.Next) -> Unit
 
+///|
 /// A single route definition
 pub struct Route {
   /// HTTP method (GET, POST, etc.)
@@ -16,25 +19,31 @@ pub struct Route {
   /// Handler function
   handler : Handler
   /// Parsed path segments for matching
-  segments : Array[(String, Bool)]  // (segment, is_param)
+  segments : Array[(String, Bool)] // (segment, is_param)
   /// Has wildcard at end
   has_wildcard : Bool
   /// Wildcard param name if :param*
-  wildcard_name : Option[String]
+  wildcard_name : String?
 }
 
+///|
 /// Create a new Route from pattern and handler
-pub fn Route::new(http_method : String, pattern : String, handler : Handler) -> Route {
+pub fn Route::new(
+  http_method : String,
+  pattern : String,
+  handler : Handler,
+) -> Route {
   let (segments, has_wildcard, wildcard_name) = parse_pattern(pattern)
-  { http_method: http_method, pattern: pattern, handler: handler, segments: segments, has_wildcard: has_wildcard, wildcard_name: wildcard_name }
+  { http_method, pattern, handler, segments, has_wildcard, wildcard_name }
 }
 
+///|
 /// Parse path pattern into segments
-fn parse_pattern(pattern : String) -> (Array[(String, Bool)], Bool, Option[String]) {
+fn parse_pattern(pattern : String) -> (Array[(String, Bool)], Bool, String?) {
   let parts_iter = String::split(pattern, "/")
   let segments : Array[(String, Bool)] = []
   let mut has_wildcard = false
-  let mut wildcard_name : Option[String] = None
+  let mut wildcard_name : String? = None
 
   for part in parts_iter {
     let part_str = part.to_string()
@@ -64,22 +73,26 @@ fn parse_pattern(pattern : String) -> (Array[(String, Bool)], Bool, Option[Strin
   (segments, has_wildcard, wildcard_name)
 }
 
+///|
 /// Match result for a route
 pub struct MatchResult {
   matched : Bool
   params : Map[String, String]
 }
 
+///|
 /// Create empty match result (no match)
 pub fn MatchResult::none() -> MatchResult {
   { matched: false, params: Map::new() }
 }
 
+///|
 /// Create successful match with params
 pub fn MatchResult::success(params : Map[String, String]) -> MatchResult {
-  { matched: true, params: params }
+  { matched: true, params }
 }
 
+///|
 /// Match a route against a request path
 pub fn Route::do_match(self : Route, path : String) -> MatchResult {
   let path_iter = String::split(path, "/")
@@ -104,7 +117,9 @@ pub fn Route::do_match(self : Route, path : String) -> MatchResult {
     let is_param = seg.1
 
     // Check if this is a wildcard param (e.g., :param*)
-    let is_wildcard_param = is_param && self.has_wildcard && self.wildcard_name != None
+    let is_wildcard_param = is_param &&
+      self.has_wildcard &&
+      self.wildcard_name != None
 
     if segment == "*" || is_wildcard_param {
       // Wildcard - capture rest of path
@@ -128,7 +143,7 @@ pub fn Route::do_match(self : Route, path : String) -> MatchResult {
         // Capture the param name from wildcard_name
         let param_name = match self.wildcard_name {
           Some(name) => name
-          None => "*"  // fallback
+          None => "*" // fallback
         }
         params[param_name] = rest
         return MatchResult::success(params)
@@ -168,6 +183,7 @@ pub fn Route::do_match(self : Route, path : String) -> MatchResult {
   }
 }
 
+///|
 /// Check if route matches the given method
 pub fn Route::matches_method(self : Route, http_method : String) -> Bool {
   self.http_method == http_method || self.http_method == "*"
