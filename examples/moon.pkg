@@ -2,6 +2,7 @@
 import {
   "wflixu/Halo/halo",
   "wflixu/Halo/halo/router",
+  "wflixu/Halo/halo/middleware",
 }
 
 options(

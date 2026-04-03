@@ -1,14 +1,16 @@
 // examples/demo.mbt
+// Demo application showcasing Halo v0.3 features
 
 fn main {
   let app = @halo.App::new()
 
-  // Logger middleware
-  ignore(app.add_middleware(fn(_ctx, next) {
-    println("Request received")
-    next()
-    println("Response sent")
-  }))
+  // Core middleware
+  ignore(app.add_middleware(@middleware.logger()))
+  ignore(app.add_middleware(@middleware.error_handler()))
+  ignore(app.add_middleware(@middleware.cors_allow_all()))
+
+  // Static files (optional)
+  // ignore(app.add_middleware(@middleware.static_files("./public")))
 
   // Router with path parameters and wildcards
   let router = @router.Router::new()
