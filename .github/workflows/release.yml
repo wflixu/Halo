@@ -21,10 +21,7 @@ jobs:
           MOONCAKE_TOKEN: ${{ secrets.MOONCAKE_TOKEN }}
         run: |
           mkdir -p $HOME/.moon
-          echo '{
-  "token": "'"$MOONCAKE_TOKEN"'",
-  "username": "wflixu"
-}' > $HOME/.moon/credentials.json
+          printf '{\n  "token": "%s",\n  "username": "wflixu"\n}\n' "$MOONCAKE_TOKEN" > $HOME/.moon/credentials.json
           chmod 600 $HOME/.moon/credentials.json
 
       - name: Check version
