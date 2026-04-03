@@ -2,3 +2,11 @@
 _build/
 .mooncakes/
 .moonagent/
+*.mbt.bin
+*.mbti
+*.mir
+*.mi
+*.core
+.vscode/
+.idea/
+*.log

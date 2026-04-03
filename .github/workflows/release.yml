@@ -1,0 +1,23 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MoonBit
+        uses: moonbit-lang/setup-moonbit@v1
+        with:
+          moonbit-version: latest
+
+      - name: Publish to mooncakes.io
+        run: |
+          moon publish
+        env:
+          MOONCAKE_TOKEN: ${{ secrets.MOONCAKE_TOKEN }}

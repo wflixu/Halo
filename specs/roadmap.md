@@ -12,7 +12,7 @@
 | v0.2 | ✅ Done | Router, path params, wildcards |
 | v0.3 | ✅ Done | Built-in middleware (logger, error_handler, cors, static) |
 | v0.4 | ✅ Done | body_parser, cookie, session, secure_headers |
-| v0.5 | Future | rate_limit, compression, etag, request_id, auth_jwt |
+| v0.5 | In Progress | SSE, rate_limit, compression, etag, request_id, auth_jwt |
 
 ---
 
