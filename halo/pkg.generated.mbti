@@ -1,0 +1,58 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "wflixu/Halo/src/halo"
+
+import {
+  "moonbitlang/core/ref",
+}
+
+// Values
+pub fn compose(Array[(Context, () -> Unit) -> Unit]) -> (Context, () -> Unit) -> Unit
+
+pub fn make_context() -> Context
+
+pub fn make_next() -> () -> Unit
+
+pub fn make_request(String, String, Map[String, String], String?) -> Request
+
+pub fn make_response(Int, Map[String, String], String?) -> Response
+
+// Errors
+
+// Types and methods
+pub struct App {
+  middlewares : Array[(Context, () -> Unit) -> Unit]
+}
+pub fn App::listen(Self, String) -> Unit
+pub fn App::middleware_count(Self) -> Int
+pub fn App::new() -> Self
+pub fn App::use(Self, (Context, () -> Unit) -> Unit) -> Self
+
+pub struct Context {
+  req : Request
+  res : @ref.Ref[Response]
+  state : Map[String, String]
+}
+pub fn Context::set_body(Self, String) -> Unit
+pub fn Context::set_json(Self, String) -> Unit
+pub fn Context::set_status(Self, Int) -> Unit
+
+pub struct Request {
+  http_method : String
+  path : String
+  headers : Map[String, String]
+  body : String?
+}
+
+pub struct Response {
+  status : @ref.Ref[Int]
+  headers : @ref.Ref[Map[String, String]]
+  body : @ref.Ref[String?]
+}
+
+// Type aliases
+pub type Middleware = (Context, () -> Unit) -> Unit
+
+pub type Next = () -> Unit
+
+// Traits
+

@@ -1,0 +1,10 @@
+// examples/moon.pkg - Package configuration for examples
+import {
+  "wflixu/Halo/halo",
+  "wflixu/Halo/halo/router",
+  "wflixu/Halo/halo/middleware",
+}
+
+options(
+  "is-main": true,
+)

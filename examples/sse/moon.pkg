@@ -1,0 +1,10 @@
+// examples/sse/moon.pkg - Package configuration for SSE example
+import {
+  "wflixu/Halo/halo",
+  "wflixu/Halo/halo/middleware",
+  "wflixu/Halo/halo/helper",
+}
+
+options(
+  "is-main": true,
+)
