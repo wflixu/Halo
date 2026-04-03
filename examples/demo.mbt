@@ -10,17 +10,31 @@ fn main {
     println("Response sent")
   }))
 
-  // Simple router
-  ignore(app.add_middleware(fn(ctx, _) {
-    if ctx.req.path == "/" {
-      ctx.set_body("Hello from Halo!")
-    } else if ctx.req.path == "/json" {
-      ctx.set_json("{\"message\": \"Hello JSON\"}")
-    } else {
+  // Router with path parameters and wildcards
+  let router = @router.Router::new()
+    .get("/", fn(ctx, _) { ctx.set_body("Hello from Halo!") })
+    .get("/json", fn(ctx, _) { ctx.set_json("{\"message\": \"Hello JSON\"}") })
+    .get("/user/:id", fn(ctx, _) {
+      let user_id = @router.param(ctx, "id")
+      match user_id {
+        Some(id) => ctx.set_body("User: " + id)
+        None => { ctx.set_status(400); ctx.set_body("Missing user id") }
+      }
+    })
+    .get("/files/:path*", fn(ctx, _) {
+      let path = @router.param(ctx, "path")
+      match path {
+        Some(p) => ctx.set_body("File: " + p)
+        None => { ctx.set_status(404); ctx.set_body("File not found") }
+      }
+    })
+    .post("/api/data", fn(ctx, _) { ctx.set_body("Data created") })
+    .handle_404(fn(ctx) {
       ctx.set_status(404)
-      ctx.set_body("Not Found")
-    }
-  }))
+      ctx.set_body("Route not found")
+    })
+
+  ignore(app.add_middleware(router.to_middleware()))
 
   println("Starting Halo server on :3000")
   app.listen(":3000")

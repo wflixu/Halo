@@ -1,6 +1,7 @@
 // examples/moon.pkg - Package configuration for examples
 import {
   "wflixu/Halo/halo",
+  "wflixu/Halo/halo/router",
 }
 
 options(
