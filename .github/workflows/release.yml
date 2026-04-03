@@ -11,10 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MoonBit
-        uses: moonbit-lang/setup-moonbit@v1
-        with:
-          moonbit-version: latest
+      - name: Install MoonBit
+        run: |
+          curl -sSf https://get.moonbitlang.com | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
       - name: Publish to mooncakes.io
         run: |
