@@ -1,7 +1,0 @@
-// import {
-//   "wflixu/Halo" @lib,
-// }
-
-options(
-  "is-main": true,
-)

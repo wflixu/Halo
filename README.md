@@ -5,7 +5,6 @@
 > A halo of middleware around every request.
 
 [![CI](https://github.com/wflixu/Halo/actions/workflows/ci.yml/badge.svg)](https://github.com/wflixu/Halo/actions/workflows/ci.yml)
-[![mooncakes.io](https://mooncakes.io/badge/wflixu/Halo/version)](https://mooncakes.io/packages/wflixu/Halo)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## ✨ Features
@@ -126,7 +125,7 @@ fn main {
 | **v0.2** | ✅ | Router with path params (`:id`) and wildcards (`*`, `:param*`) |
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
-| **v0.5** | 🚧 | SSE, request_id, compression, rate_limit, auth_jwt |
+| **v0.5** | ✅ | SSE, request_id - compression, rate_limit, auth_jwt (planned) |
 
 See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
 

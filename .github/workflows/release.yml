@@ -16,8 +16,28 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
+      - name: Login to mooncakes.io
+        env:
+          MOONCAKE_TOKEN: ${{ secrets.MOONCAKE_TOKEN }}
+        run: |
+          mkdir -p $HOME/.moon
+          echo '{
+  "token": "'"$MOONCAKE_TOKEN"'",
+  "username": "wflixu"
+}' > $HOME/.moon/credentials.json
+          chmod 600 $HOME/.moon/credentials.json
+
+      - name: Check version
+        run: |
+          VERSION=$(cat moon.mod.json | grep '"version"' | head -1 | cut -d'"' -f4)
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Module version: $VERSION"
+          echo "Tag version: $TAG_VERSION"
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: Module version ($VERSION) does not match tag ($TAG_VERSION)"
+            exit 1
+          fi
+
       - name: Publish to mooncakes.io
         run: |
           moon publish
-        env:
-          MOONCAKE_TOKEN: ${{ secrets.MOONCAKE_TOKEN }}
