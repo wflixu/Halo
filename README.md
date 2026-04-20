@@ -115,6 +115,12 @@ fn main {
 | `session()` | Session management |
 | `static_files(root)` | Static file serving |
 | `request_id()` | Request tracing ID |
+| `bearer_auth(...)` / `bearer_auth_with_options(...)` | Bearer Token authentication |
+| `rate_limit_ip_based(...)` / `rate_limit_user_based(...)` | Rate limiting (IP/user-based) |
+| `compression()` / `compression_with_options(...)` | Response compression (gzip/brotli) |
+| `etag()` / `etag_with_options(...)` | ETag generation for HTTP caching |
+| `timeout()` / `timeout_with_options(...)` | Request timeout with automatic cancellation |
+| `jwt_auth(...)` / `jwt_auth_with_options(...)` | JWT token validation |
 | `sse_*()` | Server-Sent Events helpers |
 
 ## 🗺️ Roadmap
@@ -125,9 +131,7 @@ fn main {
 | **v0.2** | ✅ | Router with path params (`:id`) and wildcards (`*`, `:param*`) |
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
-| **v0.5** | ✅ | SSE, request_id - compression, rate_limit, auth_jwt (planned) |
-
-See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
+| **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag, timeout, JWT auth |
 
 ## 📁 Project Structure
 
@@ -144,15 +148,21 @@ wflixu/Halo/
 │   ├── route.mbt              # Path matching
 │   └── router_test.mbt
 ├── halo/middleware/           # Built-in middleware
-│   ├── logger.mbt
-│   ├── error_handler.mbt
-│   ├── cors.mbt
-│   ├── static.mbt
-│   ├── body_parser.mbt
-│   ├── cookie_parser.mbt
-│   ├── session.mbt
-│   ├── secure_headers.mbt
-│   └── request_id.mbt
+│   ├── logger.mbt             # Request logging
+│   ├── error_handler.mbt      # Unified error handling
+│   ├── cors.mbt               # CORS support
+│   ├── static.mbt             # Static file serving
+│   ├── body_parser.mbt        # JSON/form body parsing
+│   ├── cookie_parser.mbt      # Cookie parsing
+│   ├── session.mbt            # Session management
+│   ├── secure_headers.mbt     # Security headers
+│   ├── request_id.mbt         # Request tracing ID
+│   ├── auth.mbt               # Bearer Token authentication
+│   ├── rate_limit.mbt         # Rate limiting (IP/user-based)
+│   ├── compression.mbt        # Response compression (gzip/brotli)
+│   ├── etag.mbt               # ETag generation for caching
+│   ├── timeout.mbt            # Request timeout handling
+│   └── jwt_auth.mbt           # JWT token validation
 ├── halo/helper/               # Helpers
 │   └── sse.mbt                # Server-Sent Events
 ├── examples/                  # Examples
@@ -161,7 +171,6 @@ wflixu/Halo/
 │       └── sse_demo.mbt
 └── specs/                     # Documentation
     ├── design.md
-    ├── roadmap.md
     └── router-design.md
 ```
 
@@ -213,3 +222,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 - [Koa](https://koajs.com) — Middleware onion model
 - [Express](https://expressjs.com) — Simple API design
 - [Hono](https://hono.dev) — Modern edge framework
+
+
+
