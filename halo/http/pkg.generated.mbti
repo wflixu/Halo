@@ -1,8 +1,8 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "wflixu/Halo/src/halo/http"
+package "wflixu/Halo/halo/http"
 
 import {
-  "wflixu/Halo/src/halo",
+  "wflixu/Halo/halo",
 }
 
 // Values

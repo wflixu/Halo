@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "wflixu/Halo/src/halo"
+package "wflixu/Halo/halo"
 
 import {
   "moonbitlang/core/ref",
@@ -9,6 +9,8 @@ import {
 pub fn compose(Array[(Context, () -> Unit) -> Unit]) -> (Context, () -> Unit) -> Unit
 
 pub fn make_context() -> Context
+
+pub fn make_context_with_request(Request) -> Context
 
 pub fn make_next() -> () -> Unit
 
@@ -22,16 +24,19 @@ pub fn make_response(Int, Map[String, String], String?) -> Response
 pub struct App {
   middlewares : Array[(Context, () -> Unit) -> Unit]
 }
+pub fn App::add_middleware(Self, (Context, () -> Unit) -> Unit) -> Self
 pub fn App::listen(Self, String) -> Unit
 pub fn App::middleware_count(Self) -> Int
 pub fn App::new() -> Self
-pub fn App::use(Self, (Context, () -> Unit) -> Unit) -> Self
 
 pub struct Context {
   req : Request
   res : @ref.Ref[Response]
   state : Map[String, String]
 }
+pub fn Context::get_header(Self, String) -> String?
+pub fn Context::get_header_or(Self, String, String) -> String
+pub fn Context::has_header(Self, String) -> Bool
 pub fn Context::set_body(Self, String) -> Unit
 pub fn Context::set_json(Self, String) -> Unit
 pub fn Context::set_status(Self, Int) -> Unit
