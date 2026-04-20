@@ -10,6 +10,13 @@ fn main {
   ignore(app.add_middleware(@middleware.error_handler()))
   ignore(app.add_middleware(@middleware.cors_allow_all()))
 
+  // Bearer Token Authentication (optional)
+  // Protects all routes except /public/* and /health
+  // ignore(app.add_middleware(@middleware.bearer_auth(fn(token) {
+  //   // Validate token - replace with your own logic
+  //   token == "secret-token"
+  // })))
+
   // Static files (optional)
   // ignore(app.add_middleware(@middleware.static_files("./public")))
 
@@ -28,6 +35,18 @@ fn main {
       }
       let body = "User-Agent: " + user_agent + "\nHas Authorization: " + (if has_auth { "yes" } else { "no" }) + "\nAuth Header: " + auth_value
       ctx.set_body(body)
+    })
+    .get("/public/info", fn(ctx, _) {
+      // Public endpoint - not protected by auth middleware
+      ctx.set_json("{\"message\": \"This is public info\"}")
+    })
+    .get("/protected", fn(ctx, _) {
+      // Protected endpoint - requires valid Bearer token
+      let token = @middleware.get_bearer_token(ctx)
+      match token {
+        Some(t) => ctx.set_json("{\"message\": \"Access granted\", \"token\": \"" + t + "\"}")
+        None => ctx.set_json("{\"message\": \"No token found\"}")
+      }
     })
     .get("/user/:id", fn(ctx, _) {
       let user_id = @router.param(ctx, "id")
