@@ -8,9 +8,7 @@ test "timeout sets timeout metadata in state" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   // Check that timeout metadata is set
   let timeout_ms = ctx.state.get("timeout_ms")
@@ -20,15 +18,13 @@ test "timeout sets timeout metadata in state" {
 ///|
 test "timeout with custom options" {
   let middleware = @middleware.timeout_with_options(
-    @middleware.make_timeout_options(5000, "Custom timeout", 504, [])
+    @middleware.make_timeout_options(5000, "Custom timeout", 504, []),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   assert_eq(ctx.res.val.status.val, 200)
 }
@@ -36,16 +32,14 @@ test "timeout with custom options" {
 ///|
 test "timeout excludes specified paths" {
   let middleware = @middleware.timeout_with_options(
-    @middleware.make_timeout_options(5000, "Timeout", 504, ["/health", "/ping"])
+    @middleware.make_timeout_options(5000, "Timeout", 504, ["/health", "/ping"]),
   )
   let headers = Map::new()
 
   // Test /health path (should be excluded)
   let req1 = @halo.make_request("GET", "/health", headers, None)
   let ctx1 = @halo.make_context_with_request(req1)
-  middleware(ctx1, fn() {
-    ctx1.set_body("Healthy")
-  })
+  middleware(ctx1, fn() { ctx1.set_body("Healthy") })
 
   // /health should not have timeout metadata
   let _ = ctx1.state.get("timeout_ms")
@@ -56,15 +50,13 @@ test "timeout excludes specified paths" {
 ///|
 test "timeout does not exclude non-excluded paths" {
   let middleware = @middleware.timeout_with_options(
-    @middleware.make_timeout_options(5000, "Timeout", 504, ["/health"])
+    @middleware.make_timeout_options(5000, "Timeout", 504, ["/health"]),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/api/data", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Data")
-  })
+  middleware(ctx, fn() { ctx.set_body("Data") })
 
   // Non-excluded path should have timeout metadata
   let timeout_ms = ctx.state.get("timeout_ms")
@@ -105,15 +97,13 @@ test "get_remaining_timeout returns default when not set" {
 ///|
 test "get_remaining_timeout returns configured timeout" {
   let middleware = @middleware.timeout_with_options(
-    @middleware.make_timeout_options(10000, "Timeout", 504, [])
+    @middleware.make_timeout_options(10000, "Timeout", 504, []),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   let remaining = @middleware.get_remaining_timeout(ctx, 0)
   // Returns default since we can't parse the string value
@@ -127,9 +117,7 @@ test "timeout default is 30 seconds" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   let timeout_ms = ctx.state.get("timeout_ms")
   match timeout_ms {
@@ -141,15 +129,13 @@ test "timeout default is 30 seconds" {
 ///|
 test "timeout with custom status code" {
   let middleware = @middleware.timeout_with_options(
-    @middleware.make_timeout_options(1000, "Slow response", 503, [])
+    @middleware.make_timeout_options(1000, "Slow response", 503, []),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   // Status should be 200 since request completed
   assert_eq(ctx.res.val.status.val, 200)

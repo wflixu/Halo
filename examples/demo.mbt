@@ -33,7 +33,12 @@ fn main {
         Some(v) => v
         None => "not provided"
       }
-      let body = "User-Agent: " + user_agent + "\nHas Authorization: " + (if has_auth { "yes" } else { "no" }) + "\nAuth Header: " + auth_value
+      let body = "User-Agent: " +
+        user_agent +
+        "\nHas Authorization: " +
+        (if has_auth { "yes" } else { "no" }) +
+        "\nAuth Header: " +
+        auth_value
       ctx.set_body(body)
     })
     .get("/public/info", fn(ctx, _) {
@@ -44,7 +49,10 @@ fn main {
       // Protected endpoint - requires valid Bearer token
       let token = @middleware.get_bearer_token(ctx)
       match token {
-        Some(t) => ctx.set_json("{\"message\": \"Access granted\", \"token\": \"" + t + "\"}")
+        Some(t) =>
+          ctx.set_json(
+            "{\"message\": \"Access granted\", \"token\": \"" + t + "\"}",
+          )
         None => ctx.set_json("{\"message\": \"No token found\"}")
       }
     })

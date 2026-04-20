@@ -36,14 +36,8 @@ fn default_compression_options() -> CompressionOptions {
     min_size: 1024,
     level: 6,
     content_types: [
-      "text/html",
-      "text/css",
-      "text/plain",
-      "text/xml",
-      "application/json",
-      "application/javascript",
-      "application/xml",
-      "image/svg+xml",
+      "text/html", "text/css", "text/plain", "text/xml", "application/json", "application/javascript",
+      "application/xml", "image/svg+xml",
     ],
   }
 }
@@ -71,7 +65,9 @@ pub fn compression() -> @halo.Middleware {
 ///   level: 9,
 /// }))
 /// ```
-pub fn compression_with_options(options : CompressionOptions) -> @halo.Middleware {
+pub fn compression_with_options(
+  options : CompressionOptions,
+) -> @halo.Middleware {
   fn(ctx : @halo.Context, next : @halo.Next) {
     // Check if client accepts encoding
     let accept_encoding = ctx.get_header("Accept-Encoding")
@@ -90,7 +86,8 @@ pub fn compression_with_options(options : CompressionOptions) -> @halo.Middlewar
             // Set Vary header
             let current_vary = ctx.res.val.headers.val.get("Vary")
             match current_vary {
-              Some(v) => ctx.res.val.headers.val["Vary"] = v + ", Accept-Encoding"
+              Some(v) =>
+                ctx.res.val.headers.val["Vary"] = v + ", Accept-Encoding"
               None => ctx.res.val.headers.val["Vary"] = "Accept-Encoding"
             }
 
@@ -100,44 +97,57 @@ pub fn compression_with_options(options : CompressionOptions) -> @halo.Middlewar
             // After next(), compress the response body if applicable
             compress_response(ctx, algo, options)
           }
-          None => {
+          None =>
             // No supported encoding, continue normally
             next()
-          }
         }
       }
-      None => {
+      None =>
         // Client doesn't specify Accept-Encoding, continue normally
         next()
-      }
     }
   }
 }
 
 ///|
 /// Select best encoding based on Accept-Encoding header
-fn select_encoding(accept_encoding : String, options : CompressionOptions) -> Option[CompressionAlgorithm] {
+fn select_encoding(
+  accept_encoding : String,
+  options : CompressionOptions,
+) -> CompressionAlgorithm? {
   // Check for brotli first (usually best compression)
   // Look for "br" in the header (case-insensitive check by looking for both cases)
-  if options.brotli && (String::contains(accept_encoding, "br") || String::contains(accept_encoding, "BR")) {
+  if options.brotli &&
+    (
+      String::contains(accept_encoding, "br") ||
+      String::contains(accept_encoding, "BR")
+    ) {
     Some(Brotli)
-  }
-  // Then gzip (most widely supported)
-  else if options.gzip && (String::contains(accept_encoding, "gzip") || String::contains(accept_encoding, "GZIP")) {
+    // Then gzip (most widely supported)
+  } else if options.gzip &&
+    (
+      String::contains(accept_encoding, "gzip") ||
+      String::contains(accept_encoding, "GZIP")
+    ) {
     Some(Gzip)
-  }
-  // Then deflate
-  else if options.deflate && (String::contains(accept_encoding, "deflate") || String::contains(accept_encoding, "DEFLATE")) {
+    // Then deflate
+  } else if options.deflate &&
+    (
+      String::contains(accept_encoding, "deflate") ||
+      String::contains(accept_encoding, "DEFLATE")
+    ) {
     Some(Deflate)
-  }
-  else {
+  } else {
     None
   }
 }
 
 ///|
 /// Check if content type should be compressed
-fn should_compress_type(content_type : String, options : CompressionOptions) -> Bool {
+fn should_compress_type(
+  content_type : String,
+  options : CompressionOptions,
+) -> Bool {
   // Check if content type is in the list
   for ct in options.content_types {
     if String::has_prefix(content_type, ct) {
@@ -149,7 +159,11 @@ fn should_compress_type(content_type : String, options : CompressionOptions) -> 
 
 ///|
 /// Compress response body if conditions are met
-fn compress_response(ctx : @halo.Context, algo : CompressionAlgorithm, options : CompressionOptions) -> Unit {
+fn compress_response(
+  ctx : @halo.Context,
+  algo : CompressionAlgorithm,
+  options : CompressionOptions,
+) -> Unit {
   let body = ctx.res.val.body.val
   let content_type = ctx.res.val.headers.val.get("Content-Type")
 
@@ -162,17 +176,13 @@ fn compress_response(ctx : @halo.Context, algo : CompressionAlgorithm, options :
 
       // Check content type
       match content_type {
-        Some(ct) => {
-          if !should_compress_type(ct, options) {
-            return
-          }
-        }
+        Some(ct) => if !should_compress_type(ct, options) { return }
         None => return
       }
 
       // Compress based on algorithm
       match algo {
-        Gzip => {
+        Gzip =>
           match compress_gzip(body_str, options.level) {
             Some(compressed) => {
               ctx.res.val.body.val = Some(compressed)
@@ -182,8 +192,7 @@ fn compress_response(ctx : @halo.Context, algo : CompressionAlgorithm, options :
             }
             None => ()
           }
-        }
-        Brotli => {
+        Brotli =>
           match compress_brotli(body_str, options.level) {
             Some(compressed) => {
               ctx.res.val.body.val = Some(compressed)
@@ -193,8 +202,7 @@ fn compress_response(ctx : @halo.Context, algo : CompressionAlgorithm, options :
             }
             None => ()
           }
-        }
-        Deflate => {
+        Deflate =>
           match compress_deflate(body_str, options.level) {
             Some(compressed) => {
               ctx.res.val.body.val = Some(compressed)
@@ -204,7 +212,6 @@ fn compress_response(ctx : @halo.Context, algo : CompressionAlgorithm, options :
             }
             None => ()
           }
-        }
       }
     }
     None => ()
@@ -285,7 +292,7 @@ pub fn get_compression_ratio() -> Float {
   let compressed = compression_stats.compressed_bytes.val
 
   if original > 0 {
-    Float::from_int(100 - (compressed * 100 / original))
+    Float::from_int(100 - compressed * 100 / original)
   } else {
     0.0
   }
@@ -293,13 +300,13 @@ pub fn get_compression_ratio() -> Float {
 
 ///|
 /// Helper to create compression options for testing
-pub fn make_compression_options(gzip : Bool, brotli : Bool, deflate : Bool, min_size : Int, level : Int, content_types : Array[String]) -> CompressionOptions {
-  {
-    gzip: gzip,
-    brotli: brotli,
-    deflate: deflate,
-    min_size: min_size,
-    level: level,
-    content_types: content_types,
-  }
+pub fn make_compression_options(
+  gzip : Bool,
+  brotli : Bool,
+  deflate : Bool,
+  min_size : Int,
+  level : Int,
+  content_types : Array[String],
+) -> CompressionOptions {
+  { gzip, brotli, deflate, min_size, level, content_types }
 }

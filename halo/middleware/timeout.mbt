@@ -117,11 +117,11 @@ pub fn get_remaining_timeout(ctx : @halo.Context, _start_time : Int) -> Int {
 
 ///|
 /// Helper to create timeout options for testing
-pub fn make_timeout_options(timeout_ms : Int, error_message : String, status_code : Int, exclude : Array[String]) -> TimeoutOptions {
-  {
-    timeout_ms: timeout_ms,
-    error_message: error_message,
-    status_code: status_code,
-    exclude: exclude,
-  }
+pub fn make_timeout_options(
+  timeout_ms : Int,
+  error_message : String,
+  status_code : Int,
+  exclude : Array[String],
+) -> TimeoutOptions {
+  { timeout_ms, error_message, status_code, exclude }
 }

@@ -15,11 +15,7 @@ pub struct EtagOptions {
 ///|
 /// Default ETag options
 fn default_etag_options() -> EtagOptions {
-  {
-    weak: false,
-    min_size: 1,
-    algorithm: "md5",
-  }
+  { weak: false, min_size: 1, algorithm: "md5" }
 }
 
 ///|
@@ -76,7 +72,7 @@ pub fn etag_with_options(options : EtagOptions) -> @halo.Middleware {
             // Get the current ETag (either set by handler or computed)
             let current_etag = ctx.res.val.headers.val.get("ETag")
             match current_etag {
-              Some(etag_value) => {
+              Some(etag_value) =>
                 // Compare ETags (handle both weak and strong comparison)
                 if etags_match(etag_value, client_etag) {
                   // 304 Not Modified
@@ -85,7 +81,6 @@ pub fn etag_with_options(options : EtagOptions) -> @halo.Middleware {
                   // Remove body-related headers for 304
                   ignore(Map::remove(ctx.res.val.headers.val, "Content-Length"))
                 }
-              }
               None => ()
             }
           }
@@ -173,7 +168,11 @@ pub fn is_not_modified(ctx : @halo.Context, current_etag : String) -> Bool {
 
 ///|
 /// Set cache-related headers for optimal caching
-pub fn set_cache_headers(ctx : @halo.Context, max_age : Int, public : Bool) -> Unit {
+pub fn set_cache_headers(
+  ctx : @halo.Context,
+  max_age : Int,
+  public : Bool,
+) -> Unit {
   let cache_control = if public {
     "public, max-age=" + Int::to_string(max_age)
   } else {
@@ -184,10 +183,10 @@ pub fn set_cache_headers(ctx : @halo.Context, max_age : Int, public : Bool) -> U
 
 ///|
 /// Helper to create etag options for testing
-pub fn make_etag_options(weak : Bool, min_size : Int, algorithm : String) -> EtagOptions {
-  {
-    weak: weak,
-    min_size: min_size,
-    algorithm: algorithm,
-  }
+pub fn make_etag_options(
+  weak : Bool,
+  min_size : Int,
+  algorithm : String,
+) -> EtagOptions {
+  { weak, min_size, algorithm }
 }

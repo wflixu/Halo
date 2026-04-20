@@ -8,9 +8,7 @@ test "etag sets ETag header on response" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello, World!")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello, World!") })
 
   let etag = ctx.res.val.headers.val.get("ETag")
   assert_eq(etag != None, true)
@@ -24,16 +22,12 @@ test "etag generates different ETags for different content" {
   // First request
   let req1 = @halo.make_request("GET", "/a", headers, None)
   let ctx1 = @halo.make_context_with_request(req1)
-  middleware(ctx1, fn() {
-    ctx1.set_body("Content A")
-  })
+  middleware(ctx1, fn() { ctx1.set_body("Content A") })
 
   // Second request
   let req2 = @halo.make_request("GET", "/b", headers, None)
   let ctx2 = @halo.make_context_with_request(req2)
-  middleware(ctx2, fn() {
-    ctx2.set_body("Content B")
-  })
+  middleware(ctx2, fn() { ctx2.set_body("Content B") })
 
   let etag1 = ctx1.res.val.headers.val.get("ETag")
   let etag2 = ctx2.res.val.headers.val.get("ETag")
@@ -83,9 +77,7 @@ test "etag skips ETag for empty body" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("")
-  })
+  middleware(ctx, fn() { ctx.set_body("") })
 
   let etag = ctx.res.val.headers.val.get("ETag")
   // Empty body should not get an ETag (min_size is 1 by default, empty string has length 0)
@@ -95,15 +87,13 @@ test "etag skips ETag for empty body" {
 ///|
 test "etag respects min_size option" {
   let middleware = @middleware.etag_with_options(
-    @middleware.make_etag_options(false, 100, "md5")
+    @middleware.make_etag_options(false, 100, "md5"),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("small")
-  })
+  middleware(ctx, fn() { ctx.set_body("small") })
 
   let etag = ctx.res.val.headers.val.get("ETag")
   // Body is smaller than min_size, no ETag should be set
@@ -113,15 +103,13 @@ test "etag respects min_size option" {
 ///|
 test "etag generates weak ETag when weak=true" {
   let middleware = @middleware.etag_with_options(
-    @middleware.make_etag_options(true, 1, "md5")
+    @middleware.make_etag_options(true, 1, "md5"),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("test content")
-  })
+  middleware(ctx, fn() { ctx.set_body("test content") })
 
   let etag = ctx.res.val.headers.val.get("ETag")
   match etag {

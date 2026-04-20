@@ -76,10 +76,10 @@ pub fn bearer_auth_with_options(options : AuthOptions) -> @halo.Middleware {
     let auth_header = ctx.get_header(options.header_name)
 
     match auth_header {
-      Some(header) => {
+      Some(header) =>
         // Extract Bearer token
         match extract_bearer_token(header) {
-          Some(token) => {
+          Some(token) =>
             // Validate token
             if (options.validate)(token) {
               // Token is valid, continue
@@ -89,14 +89,12 @@ pub fn bearer_auth_with_options(options : AuthOptions) -> @halo.Middleware {
               ctx.set_status(401)
               ctx.set_json("{ \"error\": \"" + options.error_message + "\" }")
             }
-          }
           None => {
             // Missing Bearer prefix
             ctx.set_status(401)
             ctx.set_json("{ \"error\": \"Missing Bearer token\" }")
           }
         }
-      }
       None => {
         // Missing Authorization header
         ctx.set_status(401)
@@ -110,7 +108,7 @@ pub fn bearer_auth_with_options(options : AuthOptions) -> @halo.Middleware {
 /// Extract Bearer token from Authorization header value
 ///
 /// Example:
-/// ```moonbit
+/// ```moonbit nocheck
 /// extract_bearer_token("Bearer abc123") // Returns Some("abc123")
 /// extract_bearer_token("Basic abc123")  // Returns None
 /// ```
@@ -166,7 +164,10 @@ pub fn get_bearer_token(ctx : @halo.Context) -> String? {
 
 ///|
 /// Get Bearer token from request context with custom header name
-pub fn get_bearer_token_with_header(ctx : @halo.Context, header_name : String) -> String? {
+pub fn get_bearer_token_with_header(
+  ctx : @halo.Context,
+  header_name : String,
+) -> String? {
   match ctx.get_header(header_name) {
     Some(header) => extract_bearer_token(header)
     None => None
@@ -175,11 +176,15 @@ pub fn get_bearer_token_with_header(ctx : @halo.Context, header_name : String) -
 
 ///|
 /// Create auth options helper for testing
-pub fn make_auth_options(validate_fn : (String) -> Bool, exclude : Array[String], error_message : String) -> AuthOptions {
+pub fn make_auth_options(
+  validate_fn : (String) -> Bool,
+  exclude : Array[String],
+  error_message : String,
+) -> AuthOptions {
   {
     validate: validate_fn,
-    exclude: exclude,
-    error_message: error_message,
+    exclude,
+    error_message,
     header_name: "Authorization",
   }
 }

@@ -78,13 +78,16 @@ test "mime_type_for_ext returns correct types" {
   assert_eq(@middleware.mime_type_for_ext("ttf"), "font/ttf")
   assert_eq(@middleware.mime_type_for_ext("pdf"), "application/pdf")
   assert_eq(@middleware.mime_type_for_ext("txt"), "text/plain")
-  assert_eq(@middleware.mime_type_for_ext("unknown"), "application/octet-stream")
+  assert_eq(
+    @middleware.mime_type_for_ext("unknown"),
+    "application/octet-stream",
+  )
 }
 
 ///|
 test "static_with_options sets cache headers" {
   let middleware = @middleware.static_with_options(
-    @middleware.make_static_options("./public", "/", true, 3600)
+    @middleware.make_static_options("./public", "/", true, 3600),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/test.css", headers, None)
@@ -101,7 +104,7 @@ test "static_with_options sets cache headers" {
 ///|
 test "static_with_options cache=false skips cache headers" {
   let middleware = @middleware.static_with_options(
-    @middleware.make_static_options("./public", "/", false, 3600)
+    @middleware.make_static_options("./public", "/", false, 3600),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/test.css", headers, None)

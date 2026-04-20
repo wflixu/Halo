@@ -58,11 +58,14 @@ let rate_limit_store : Ref[Map[String, RateLimitState]] = { val: Map::new() }
 /// // 100 requests per minute per IP
 /// app.add_middleware(@middleware.rate_limit_ip_based(100, 60))
 /// ```
-pub fn rate_limit_ip_based(max_requests : Int, window_seconds : Int) -> @halo.Middleware {
+pub fn rate_limit_ip_based(
+  max_requests : Int,
+  window_seconds : Int,
+) -> @halo.Middleware {
   let opts = default_rate_limit_options()
   rate_limit_with_options({
-    max_requests: max_requests,
-    window_seconds: window_seconds,
+    max_requests,
+    window_seconds,
     strategy: opts.strategy,
     error_message: opts.error_message,
     status_code: opts.status_code,
@@ -77,11 +80,14 @@ pub fn rate_limit_ip_based(max_requests : Int, window_seconds : Int) -> @halo.Mi
 /// // 1000 requests per hour per user
 /// app.add_middleware(@middleware.rate_limit_user_based(1000, 3600))
 /// ```
-pub fn rate_limit_user_based(max_requests : Int, window_seconds : Int) -> @halo.Middleware {
+pub fn rate_limit_user_based(
+  max_requests : Int,
+  window_seconds : Int,
+) -> @halo.Middleware {
   let opts = default_rate_limit_options()
   rate_limit_with_options({
-    max_requests: max_requests,
-    window_seconds: window_seconds,
+    max_requests,
+    window_seconds,
     strategy: UserBased,
     error_message: opts.error_message,
     status_code: opts.status_code,
@@ -113,7 +119,13 @@ pub fn rate_limit_with_options(options : RateLimitOptions) -> @halo.Middleware {
     } else {
       // Rate limit exceeded
       ctx.set_status(options.status_code)
-      ctx.set_json("{ \"error\": \"" + options.error_message + "\", \"retry_after\": " + Int::to_string(options.window_seconds) + " }")
+      ctx.set_json(
+        "{ \"error\": \"" +
+        options.error_message +
+        "\", \"retry_after\": " +
+        Int::to_string(options.window_seconds) +
+        " }",
+      )
     }
   }
 }
@@ -135,12 +147,11 @@ fn get_identifier(ctx : @halo.Context, strategy : RateLimitStrategy) -> String {
             "unknown"
           }
         }
-        None => {
+        None =>
           match ctx.get_header("X-Real-IP") {
             Some(ip) => ip.to_string()
             None => "unknown"
           }
-        }
       }
     UserBased =>
       // Try to get user ID from state (set by auth middleware)
@@ -168,14 +179,12 @@ fn check_rate_limit(identifier : String, options : RateLimitOptions) -> Bool {
         state.count.val = 1
         state.window_start.val = current_time
         true
-      } else {
         // Same window, check count
-        if count >= options.max_requests {
-          false
-        } else {
-          state.count.val = count + 1
-          true
-        }
+      } else if count >= options.max_requests {
+        false
+      } else {
+        state.count.val = count + 1
+        true
       }
     }
     None => {
@@ -223,7 +232,10 @@ pub fn advance_timestamp(seconds : Int) -> Unit {
 
 ///|
 /// Get remaining requests for an identifier
-pub fn get_remaining_requests(identifier : String, options : RateLimitOptions) -> Int {
+pub fn get_remaining_requests(
+  identifier : String,
+  options : RateLimitOptions,
+) -> Int {
   let current_time = get_current_timestamp()
   let store = rate_limit_store.val
 
@@ -244,25 +256,31 @@ pub fn get_remaining_requests(identifier : String, options : RateLimitOptions) -
 
 ///|
 /// Get rate limit headers to add to response
-pub fn get_rate_limit_headers(identifier : String, options : RateLimitOptions) -> Map[String, String] {
+pub fn get_rate_limit_headers(
+  identifier : String,
+  options : RateLimitOptions,
+) -> Map[String, String] {
   let remaining = get_remaining_requests(identifier, options)
   let headers = Map::new()
   headers["X-RateLimit-Limit"] = Int::to_string(options.max_requests)
   headers["X-RateLimit-Remaining"] = Int::to_string(remaining)
-  headers["X-RateLimit-Reset"] = Int::to_string(get_current_timestamp() + options.window_seconds)
+  headers["X-RateLimit-Reset"] = Int::to_string(
+    get_current_timestamp() + options.window_seconds,
+  )
   headers
 }
 
 ///|
 /// Helper to create rate limit options for testing
-pub fn make_rate_limit_options(max_requests : Int, window_seconds : Int, strategy : RateLimitStrategy, _header_name : String, error_message : String, status_code : Int) -> RateLimitOptions {
-  {
-    max_requests: max_requests,
-    window_seconds: window_seconds,
-    strategy: strategy,
-    error_message: error_message,
-    status_code: status_code,
-  }
+pub fn make_rate_limit_options(
+  max_requests : Int,
+  window_seconds : Int,
+  strategy : RateLimitStrategy,
+  _header_name : String,
+  error_message : String,
+  status_code : Int,
+) -> RateLimitOptions {
+  { max_requests, window_seconds, strategy, error_message, status_code }
 }
 
 ///|

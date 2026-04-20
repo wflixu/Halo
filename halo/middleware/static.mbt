@@ -17,12 +17,7 @@ pub struct StaticOptions {
 ///|
 /// Default static file options
 fn default_static_options() -> StaticOptions {
-  {
-    root: "./public",
-    prefix: "/",
-    cache: true,
-    max_age: 31536000,
-  }
+  { root: "./public", prefix: "/", cache: true, max_age: 31536000 }
 }
 
 ///|
@@ -35,7 +30,7 @@ fn default_static_options() -> StaticOptions {
 pub fn static_files(root : String) -> @halo.Middleware {
   let opts = default_static_options()
   static_with_options({
-    root: root,
+    root,
     prefix: opts.prefix,
     cache: opts.cache,
     max_age: opts.max_age,
@@ -51,12 +46,7 @@ pub fn static_files(root : String) -> @halo.Middleware {
 /// ```
 pub fn static_with_prefix(root : String, prefix : String) -> @halo.Middleware {
   let opts = default_static_options()
-  static_with_options({
-    root: root,
-    prefix: prefix,
-    cache: opts.cache,
-    max_age: opts.max_age,
-  })
+  static_with_options({ root, prefix, cache: opts.cache, max_age: opts.max_age })
 }
 
 ///|
@@ -116,7 +106,8 @@ pub fn static_with_options(options : StaticOptions) -> @halo.Middleware {
 
     // Set caching headers if enabled
     if options.cache {
-      ctx.res.val.headers.val["Cache-Control"] = "public, max-age=" + Int::to_string(options.max_age)
+      ctx.res.val.headers.val["Cache-Control"] = "public, max-age=" +
+        Int::to_string(options.max_age)
       ctx.res.val.headers.val["ETag"] = generate_etag(full_path)
     }
 
@@ -126,9 +117,7 @@ pub fn static_with_options(options : StaticOptions) -> @halo.Middleware {
 
     // Try to read file content (placeholder - depends on runtime)
     match read_file_content(full_path) {
-      Some(content) => {
-        ctx.set_body(content)
-      }
+      Some(content) => ctx.set_body(content)
       None => {
         ctx.set_status(404)
         ctx.set_body("File not found: " + file_path)
@@ -214,11 +203,11 @@ pub fn mime_type_for_ext(ext : String) -> String {
 
 ///|
 /// Helper to create static options for testing
-pub fn make_static_options(root : String, prefix : String, cache : Bool, max_age : Int) -> StaticOptions {
-  {
-    root: root,
-    prefix: prefix,
-    cache: cache,
-    max_age: max_age,
-  }
+pub fn make_static_options(
+  root : String,
+  prefix : String,
+  cache : Bool,
+  max_age : Int,
+) -> StaticOptions {
+  { root, prefix, cache, max_age }
 }

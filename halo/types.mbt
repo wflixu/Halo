@@ -123,7 +123,11 @@ pub fn Context::get_header(self : Context, name : String) -> String? {
 
 ///|
 /// Get a request header value with a default fallback
-pub fn Context::get_header_or(self : Context, name : String, default : String) -> String {
+pub fn Context::get_header_or(
+  self : Context,
+  name : String,
+  default : String,
+) -> String {
   match self.req.headers.get(name) {
     Some(value) => value
     None => default

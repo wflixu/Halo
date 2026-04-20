@@ -11,7 +11,7 @@ test "rate_limit_ip_based allows requests within limit" {
   headers["X-Forwarded-For"] = "192.168.1.1"
 
   // First 5 requests should succeed
-  for _i in 1..=5 {
+  for _i in 1..<=5 {
     let req = @halo.make_request("GET", "/", headers, None)
     let ctx = @halo.make_context_with_request(req)
     let called : Ref[Bool] = { val: false }
@@ -32,7 +32,7 @@ test "rate_limit_ip_based blocks requests over limit" {
   headers["X-Forwarded-For"] = "192.168.1.2"
 
   // First 3 requests should succeed
-  for _i in 1..=3 {
+  for _i in 1..<=3 {
     let req = @halo.make_request("GET", "/", headers, None)
     let ctx = @halo.make_context_with_request(req)
     let called : Ref[Bool] = { val: false }
@@ -61,7 +61,7 @@ test "rate_limit resets after window expires" {
   headers["X-Forwarded-For"] = "192.168.1.3"
 
   // Use up the limit
-  for _i in 1..=2 {
+  for _i in 1..<=2 {
     let req = @halo.make_request("GET", "/", headers, None)
     let ctx = @halo.make_context_with_request(req)
     let called : Ref[Bool] = { val: false }
@@ -137,7 +137,7 @@ test "different IPs have separate limits" {
   headers2["X-Forwarded-For"] = "10.0.0.2"
 
   // IP1 uses its limit
-  for _i in 1..=2 {
+  for _i in 1..<=2 {
     let req = @halo.make_request("GET", "/", headers1, None)
     let ctx = @halo.make_context_with_request(req)
     let called : Ref[Bool] = { val: false }
@@ -164,7 +164,14 @@ test "get_remaining_requests returns correct count" {
   @middleware.reset_rate_limit_store()
   @middleware.set_current_timestamp(7000)
 
-  let options = @middleware.make_rate_limit_options(5, 60, @middleware.ip_based_strategy(), "X-API-Key", "Too many requests", 429)
+  let options = @middleware.make_rate_limit_options(
+    5,
+    60,
+    @middleware.ip_based_strategy(),
+    "X-API-Key",
+    "Too many requests",
+    429,
+  )
   let identifier = "test-ip"
 
   // Initially should have max requests
@@ -176,7 +183,7 @@ test "get_remaining_requests returns correct count" {
   let middleware = @middleware.rate_limit_with_options(options)
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
-  middleware(ctx, fn() { })
+  middleware(ctx, fn() {  })
 
   // Should have 4 remaining
   assert_eq(@middleware.get_remaining_requests(identifier, options), 4)
@@ -194,12 +201,12 @@ test "rate limit returns 429 with retry_after" {
   // First request succeeds
   let req1 = @halo.make_request("GET", "/", headers, None)
   let ctx1 = @halo.make_context_with_request(req1)
-  middleware(ctx1, fn() { })
+  middleware(ctx1, fn() {  })
 
   // Second request fails with 429
   let req2 = @halo.make_request("GET", "/", headers, None)
   let ctx2 = @halo.make_context_with_request(req2)
-  middleware(ctx2, fn() { })
+  middleware(ctx2, fn() {  })
 
   assert_eq(ctx2.res.val.status.val, 429)
   // Check response contains retry_after

@@ -8,9 +8,7 @@ test "jwt_auth rejects request without Authorization header" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   assert_eq(ctx.res.val.status.val, 401)
 }
@@ -23,9 +21,7 @@ test "jwt_auth rejects invalid token format" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   // Invalid format (not 3 parts) should be rejected
   assert_eq(ctx.res.val.status.val, 401)
@@ -40,9 +36,7 @@ test "jwt_auth accepts valid JWT structure" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   assert_eq(ctx.res.val.status.val, 200)
   // JWT payload should be stored in context
@@ -59,9 +53,7 @@ test "jwt_auth stores token in context" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   let stored_token = @middleware.get_jwt_token(ctx)
   match stored_token {
@@ -79,16 +71,14 @@ test "jwt_auth excludes specified paths" {
       "Unauthorized",
       "Authorization",
       "Bearer ",
-      "HS256"
-    )
+      "HS256",
+    ),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/health", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Healthy")
-  })
+  middleware(ctx, fn() { ctx.set_body("Healthy") })
 
   // Excluded paths should not require auth
   assert_eq(ctx.res.val.status.val, 200)
@@ -103,16 +93,14 @@ test "jwt_auth does not exclude non-excluded paths" {
       "Unauthorized",
       "Authorization",
       "Bearer ",
-      "HS256"
-    )
+      "HS256",
+    ),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/api/data", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Data")
-  })
+  middleware(ctx, fn() { ctx.set_body("Data") })
 
   // Non-excluded path without auth should be rejected
   assert_eq(ctx.res.val.status.val, 401)
@@ -127,17 +115,15 @@ test "jwt_auth_with_options accepts valid token" {
       "Invalid token",
       "Authorization",
       "Bearer ",
-      "HS256"
-    )
+      "HS256",
+    ),
   )
   let headers = Map::new()
   headers["Authorization"] = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signature"
   let req = @halo.make_request("GET", "/api", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Success")
-  })
+  middleware(ctx, fn() { ctx.set_body("Success") })
 
   assert_eq(ctx.res.val.status.val, 200)
 }
@@ -150,9 +136,7 @@ test "jwt_auth rejects empty secret" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   // Empty secret should reject
   assert_eq(ctx.res.val.status.val, 401)
@@ -167,17 +151,15 @@ test "jwt_auth handles custom header name" {
       "Unauthorized",
       "X-Auth-Token",
       "Bearer ",
-      "HS256"
-    )
+      "HS256",
+    ),
   )
   let headers = Map::new()
   headers["X-Auth-Token"] = "Bearer token.payload.signature"
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   assert_eq(ctx.res.val.status.val, 200)
 }
@@ -190,9 +172,7 @@ test "jwt_auth stores jwt_payload in context state" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   let payload = ctx.state.get("jwt_payload")
   assert_eq(payload != None, true)
@@ -210,9 +190,7 @@ test "get_jwt_claim returns claim info" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  middleware(ctx, fn() {
-    ctx.set_body("Hello")
-  })
+  middleware(ctx, fn() { ctx.set_body("Hello") })
 
   let claim = @middleware.get_jwt_claim(ctx, "sub")
   assert_eq(claim != None, true)

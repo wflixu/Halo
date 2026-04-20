@@ -67,7 +67,7 @@ test "bearer_auth_with_options excludes paths" {
       fn(_token) { false },
       ["/public", "/health"],
       "Unauthorized",
-    )
+    ),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/public/info", headers, None)
@@ -87,7 +87,7 @@ test "bearer_auth_with_options protects non-excluded paths" {
       fn(_token) { false },
       ["/public"],
       "Unauthorized",
-    )
+    ),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/protected", headers, None)
@@ -103,11 +103,7 @@ test "bearer_auth_with_options protects non-excluded paths" {
 ///|
 test "bearer_auth_with_options uses custom error message" {
   let middleware = @middleware.bearer_auth_with_options(
-    @middleware.make_auth_options(
-      fn(_token) { false },
-      [],
-      "Custom error",
-    )
+    @middleware.make_auth_options(fn(_token) { false }, [], "Custom error"),
   )
   let headers = Map::new()
   let req = @halo.make_request("GET", "/protected", headers, None)

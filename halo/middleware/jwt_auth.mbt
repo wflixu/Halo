@@ -46,7 +46,7 @@ fn default_jwt_auth_options() -> JwtAuthOptions {
 pub fn jwt_auth(secret : String) -> @halo.Middleware {
   let opts = default_jwt_auth_options()
   jwt_auth_with_options({
-    secret: secret,
+    secret,
     exclude: opts.exclude,
     error_message: opts.error_message,
     header_name: opts.header_name,
@@ -86,7 +86,7 @@ pub fn jwt_auth_with_options(options : JwtAuthOptions) -> @halo.Middleware {
         let token = extract_token(header, options.token_prefix)
 
         match token {
-          Some(jwt_token) => {
+          Some(jwt_token) =>
             // Validate JWT token
             if validate_jwt(jwt_token, options.secret, options.algorithm) {
               // Store decoded payload in context state for handler access
@@ -99,7 +99,6 @@ pub fn jwt_auth_with_options(options : JwtAuthOptions) -> @halo.Middleware {
               ctx.set_status(401)
               ctx.set_json("{ \"error\": \"" + options.error_message + "\" }")
             }
-          }
           None => {
             // No token found
             ctx.set_status(401)
@@ -134,13 +133,11 @@ fn extract_token(auth_header : String, prefix : String) -> String? {
     } else {
       None
     }
-  } else {
     // No prefix, treat entire header as token
-    if String::length(auth_header) > 0 {
-      Some(auth_header)
-    } else {
-      None
-    }
+  } else if String::length(auth_header) > 0 {
+    Some(auth_header)
+  } else {
+    None
   }
 }
 
@@ -212,24 +209,23 @@ pub fn get_jwt_token(ctx : @halo.Context) -> String? {
 /// In production, this would parse the JSON payload and extract the claim
 pub fn get_jwt_claim(ctx : @halo.Context, claim_name : String) -> String? {
   match ctx.state.get("jwt_payload") {
-    Some(payload) => {
+    Some(payload) =>
       // Simplified: just return payload with claim name prefix
       // In production, parse JSON and extract the specific claim
       Some(payload + "." + claim_name)
-    }
     None => None
   }
 }
 
 ///|
 /// Helper to create JWT auth options for testing
-pub fn make_jwt_auth_options(secret : String, exclude : Array[String], error_message : String, header_name : String, token_prefix : String, algorithm : String) -> JwtAuthOptions {
-  {
-    secret: secret,
-    exclude: exclude,
-    error_message: error_message,
-    header_name: header_name,
-    token_prefix: token_prefix,
-    algorithm: algorithm,
-  }
+pub fn make_jwt_auth_options(
+  secret : String,
+  exclude : Array[String],
+  error_message : String,
+  header_name : String,
+  token_prefix : String,
+  algorithm : String,
+) -> JwtAuthOptions {
+  { secret, exclude, error_message, header_name, token_prefix, algorithm }
 }
