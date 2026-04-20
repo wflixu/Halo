@@ -12,7 +12,7 @@
 | v0.2 | ✅ Done | Router, path params, wildcards |
 | v0.3 | ✅ Done | Built-in middleware (logger, error_handler, cors, static) |
 | v0.4 | ✅ Done | body_parser, cookie, session, secure_headers |
-| v0.5 | ✅ Done | SSE, request_id, bearer_auth, rate_limit, compression, etag |
+| v0.5 | ✅ Done | SSE, request_id, bearer_auth, rate_limit, compression, etag, timeout, jwt_auth |
 
 ---
 
@@ -206,16 +206,81 @@ app.add_middleware(@middleware.secure_headers())
 
 **Goal:** Add advanced middleware for specific scenarios.
 
-**Completed:**
-- ✅ `rate_limit` - Request rate limiting (per IP, per user)
-- ✅ `compression` - gzip / brotli response compression
-- ✅ `etag` - Automatic ETag generation for caching
-- ✅ `request_id` - Unique request tracing ID
-- ✅ `bearer_auth` - Bearer Token authentication
-- ✅ `timeout` - Request timeout with automatic cancellation
-- ✅ `jwt_auth` - JWT token validation
+**Files Created:**
+```
+halo/
+└── middleware/
+    ├── request_id.mbt        # Request tracing ID
+    ├── auth.mbt             # Bearer Token authentication
+    ├── rate_limit.mbt       # Rate limiting (IP/user-based)
+    ├── compression.mbt      # Response compression (gzip/brotli/deflate)
+    ├── etag.mbt             # ETag generation for caching
+    ├── timeout.mbt          # Request timeout handling
+    └── jwt_auth.mbt         # JWT token validation
+```
 
-**Completed Features:** All v0.5 planned features are complete!
+**Completed:**
+- ✅ `request_id` - Unique request tracing ID
+- ✅ `bearer_auth` - Bearer Token authentication with path exclusion
+- ✅ `rate_limit` - Request rate limiting (per IP, per user)
+- ✅ `compression` - gzip / brotli / deflate response compression
+- ✅ `etag` - Automatic ETag generation for caching (strong/weak)
+- ✅ `timeout` - Request timeout with automatic cancellation
+- ✅ `jwt_auth` - JWT token validation with payload decoding
+
+**API Examples:**
+
+### rate_limit
+
+```moonbit
+app.add_middleware(@middleware.rate_limit_ip_based(100, 60))
+app.add_middleware(@middleware.rate_limit_user_based(50, 60))
+```
+
+### compression
+
+```moonbit
+app.add_middleware(@middleware.compression())
+app.add_middleware(@middleware.compression_with_options({
+  gzip: true,
+  brotli: true,
+  min_size: 1024,
+}))
+```
+
+### etag
+
+```moonbit
+app.add_middleware(@middleware.etag())
+app.add_middleware(@middleware.etag_with_options({ weak: true, min_size: 100 }))
+```
+
+### timeout
+
+```moonbit
+app.add_middleware(@middleware.timeout())
+app.add_middleware(@middleware.timeout_with_options({
+  timeout_ms: 5000,
+  exclude: ["/health", "/ping"],
+}))
+```
+
+### jwt_auth
+
+```moonbit
+app.add_middleware(@middleware.jwt_auth("your-secret-key"))
+app.add_middleware(@middleware.jwt_auth_with_options({
+  secret: "your-secret",
+  exclude: ["/public"],
+  algorithm: "HS256",
+}))
+
+// In handler:
+let payload = @middleware.get_jwt_payload(ctx)
+let user_id = @middleware.get_jwt_claim(ctx, "sub")
+```
+
+**Tests:** 113/113 passing
 
 ---
 

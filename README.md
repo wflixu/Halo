@@ -150,15 +150,21 @@ wflixu/Halo/
 │   ├── route.mbt              # Path matching
 │   └── router_test.mbt
 ├── halo/middleware/           # Built-in middleware
-│   ├── logger.mbt
-│   ├── error_handler.mbt
-│   ├── cors.mbt
-│   ├── static.mbt
-│   ├── body_parser.mbt
-│   ├── cookie_parser.mbt
-│   ├── session.mbt
-│   ├── secure_headers.mbt
-│   └── request_id.mbt
+│   ├── logger.mbt             # Request logging
+│   ├── error_handler.mbt      # Unified error handling
+│   ├── cors.mbt               # CORS support
+│   ├── static.mbt             # Static file serving
+│   ├── body_parser.mbt        # JSON/form body parsing
+│   ├── cookie_parser.mbt      # Cookie parsing
+│   ├── session.mbt            # Session management
+│   ├── secure_headers.mbt     # Security headers
+│   ├── request_id.mbt         # Request tracing ID
+│   ├── auth.mbt               # Bearer Token authentication
+│   ├── rate_limit.mbt         # Rate limiting (IP/user-based)
+│   ├── compression.mbt        # Response compression (gzip/brotli)
+│   ├── etag.mbt               # ETag generation for caching
+│   ├── timeout.mbt            # Request timeout handling
+│   └── jwt_auth.mbt           # JWT token validation
 ├── halo/helper/               # Helpers
 │   └── sse.mbt                # Server-Sent Events
 ├── examples/                  # Examples
