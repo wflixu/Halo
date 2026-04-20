@@ -120,6 +120,7 @@ fn main {
 | `compression()` / `compression_with_options(...)` | Response compression (gzip/brotli) |
 | `etag()` / `etag_with_options(...)` | ETag generation for HTTP caching |
 | `timeout()` / `timeout_with_options(...)` | Request timeout with automatic cancellation |
+| `jwt_auth(...)` / `jwt_auth_with_options(...)` | JWT token validation |
 | `sse_*()` | Server-Sent Events helpers |
 
 ## 🗺️ Roadmap
@@ -130,7 +131,7 @@ fn main {
 | **v0.2** | ✅ | Router with path params (`:id`) and wildcards (`*`, `:param*`) |
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
-| **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag, timeout |
+| **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag, timeout, JWT auth |
 
 See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
 

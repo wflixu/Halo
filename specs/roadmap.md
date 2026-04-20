@@ -213,9 +213,9 @@ app.add_middleware(@middleware.secure_headers())
 - ✅ `request_id` - Unique request tracing ID
 - ✅ `bearer_auth` - Bearer Token authentication
 - ✅ `timeout` - Request timeout with automatic cancellation
+- ✅ `jwt_auth` - JWT token validation
 
-**Remaining:**
-- `auth_jwt` - JWT token validation (extends bearer_auth)
+**Completed Features:** All v0.5 planned features are complete!
 
 ---
 
