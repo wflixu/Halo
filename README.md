@@ -133,8 +133,6 @@ fn main {
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
 | **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag, timeout, JWT auth |
 
-See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
-
 ## 📁 Project Structure
 
 ```
@@ -173,7 +171,6 @@ wflixu/Halo/
 │       └── sse_demo.mbt
 └── specs/                     # Documentation
     ├── design.md
-    ├── roadmap.md
     └── router-design.md
 ```
 
