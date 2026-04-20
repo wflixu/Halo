@@ -212,9 +212,9 @@ app.add_middleware(@middleware.secure_headers())
 - ✅ `etag` - Automatic ETag generation for caching
 - ✅ `request_id` - Unique request tracing ID
 - ✅ `bearer_auth` - Bearer Token authentication
+- ✅ `timeout` - Request timeout with automatic cancellation
 
 **Remaining:**
-- `timeout` - Request timeout with automatic cancellation
 - `auth_jwt` - JWT token validation (extends bearer_auth)
 
 ---

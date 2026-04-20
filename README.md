@@ -119,6 +119,7 @@ fn main {
 | `rate_limit_ip_based(...)` / `rate_limit_user_based(...)` | Rate limiting (IP/user-based) |
 | `compression()` / `compression_with_options(...)` | Response compression (gzip/brotli) |
 | `etag()` / `etag_with_options(...)` | ETag generation for HTTP caching |
+| `timeout()` / `timeout_with_options(...)` | Request timeout with automatic cancellation |
 | `sse_*()` | Server-Sent Events helpers |
 
 ## 🗺️ Roadmap
@@ -129,7 +130,7 @@ fn main {
 | **v0.2** | ✅ | Router with path params (`:id`) and wildcards (`*`, `:param*`) |
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
-| **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag |
+| **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag, timeout |
 
 See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
 
@@ -219,12 +220,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 - [Hono](https://hono.dev) — Modern edge framework
 
 
-
-v0.5 规划中（高优先级）
-功能	说明	优先级
-rate_limit	请求限流（按 IP、按用户）	🔴 高
-compression	gzip / brotli 响应压缩	🔴 高
-etag	自动 ETag 生成用于缓存	🟡 中
-timeout	请求超时自动取消	🟡 中
-auth_jwt	JWT 令牌验证（比 bearer_auth 更完整）	🔴 高
 
