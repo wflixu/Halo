@@ -17,6 +17,18 @@ fn main {
   let router = @router.Router::new()
     .get("/", fn(ctx, _) { ctx.set_body("Hello from Halo!") })
     .get("/json", fn(ctx, _) { ctx.set_json("{\"message\": \"Hello JSON\"}") })
+    .get("/headers", fn(ctx, _) {
+      // Example: getting request headers
+      let user_agent = ctx.get_header_or("User-Agent", "unknown")
+      let has_auth = ctx.has_header("Authorization")
+      let auth_header = ctx.get_header("Authorization")
+      let auth_value = match auth_header {
+        Some(v) => v
+        None => "not provided"
+      }
+      let body = "User-Agent: " + user_agent + "\nHas Authorization: " + (if has_auth { "yes" } else { "no" }) + "\nAuth Header: " + auth_value
+      ctx.set_body(body)
+    })
     .get("/user/:id", fn(ctx, _) {
       let user_id = @router.param(ctx, "id")
       match user_id {

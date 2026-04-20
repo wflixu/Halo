@@ -81,6 +81,19 @@ pub fn make_response(
 }
 
 ///|
+/// Helper to create context with custom request
+pub fn make_context_with_request(req : Request) -> Context {
+  let res : Ref[Response] = {
+    val: {
+      status: { val: 200 },
+      headers: { val: Map::new() },
+      body: { val: None },
+    },
+  }
+  { req, res, state: Map::new() }
+}
+
+///|
 /// Context helper methods
 
 ///|
@@ -100,4 +113,28 @@ pub fn Context::set_status(self : Context, status : Int) -> Unit {
 pub fn Context::set_json(self : Context, json_str : String) -> Unit {
   self.res.val.headers.val["Content-Type"] = "application/json"
   self.res.val.body.val = Some(json_str)
+}
+
+///|
+/// Get a request header value by name (returns None if not found)
+pub fn Context::get_header(self : Context, name : String) -> String? {
+  self.req.headers.get(name)
+}
+
+///|
+/// Get a request header value with a default fallback
+pub fn Context::get_header_or(self : Context, name : String, default : String) -> String {
+  match self.req.headers.get(name) {
+    Some(value) => value
+    None => default
+  }
+}
+
+///|
+/// Check if a request header exists
+pub fn Context::has_header(self : Context, name : String) -> Bool {
+  match self.req.headers.get(name) {
+    Some(_) => true
+    None => false
+  }
 }
