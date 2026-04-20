@@ -118,6 +118,7 @@ fn main {
 | `bearer_auth(...)` / `bearer_auth_with_options(...)` | Bearer Token authentication |
 | `rate_limit_ip_based(...)` / `rate_limit_user_based(...)` | Rate limiting (IP/user-based) |
 | `compression()` / `compression_with_options(...)` | Response compression (gzip/brotli) |
+| `etag()` / `etag_with_options(...)` | ETag generation for HTTP caching |
 | `sse_*()` | Server-Sent Events helpers |
 
 ## 🗺️ Roadmap
@@ -128,7 +129,7 @@ fn main {
 | **v0.2** | ✅ | Router with path params (`:id`) and wildcards (`*`, `:param*`) |
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
-| **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression |
+| **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag |
 
 See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
 

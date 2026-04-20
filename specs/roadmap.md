@@ -12,7 +12,7 @@
 | v0.2 | ✅ Done | Router, path params, wildcards |
 | v0.3 | ✅ Done | Built-in middleware (logger, error_handler, cors, static) |
 | v0.4 | ✅ Done | body_parser, cookie, session, secure_headers |
-| v0.5 | ✅ Done | SSE, request_id, bearer_auth, rate_limit, compression |
+| v0.5 | ✅ Done | SSE, request_id, bearer_auth, rate_limit, compression, etag |
 
 ---
 
@@ -202,17 +202,20 @@ app.add_middleware(@middleware.secure_headers())
 
 ## v0.5 Middleware Advanced Plan
 
-**Status:** 🔮 Future
+**Status:** ✅ Complete
 
 **Goal:** Add advanced middleware for specific scenarios.
 
-**Planned:**
-- `rate_limit` - Request rate limiting (per IP, per user)
-- `compression` - gzip / brotli response compression
-- `etag` - Automatic ETag generation for caching
-- `request_id` - Unique request tracing ID
+**Completed:**
+- ✅ `rate_limit` - Request rate limiting (per IP, per user)
+- ✅ `compression` - gzip / brotli response compression
+- ✅ `etag` - Automatic ETag generation for caching
+- ✅ `request_id` - Unique request tracing ID
+- ✅ `bearer_auth` - Bearer Token authentication
+
+**Remaining:**
 - `timeout` - Request timeout with automatic cancellation
-- `auth_jwt` - JWT token validation
+- `auth_jwt` - JWT token validation (extends bearer_auth)
 
 ---
 
