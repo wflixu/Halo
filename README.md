@@ -115,6 +115,7 @@ fn main {
 | `session()` | Session management |
 | `static_files(root)` | Static file serving |
 | `request_id()` | Request tracing ID |
+| `bearer_auth(...)` / `bearer_auth_with_options(...)` | Bearer Token authentication |
 | `sse_*()` | Server-Sent Events helpers |
 
 ## 🗺️ Roadmap
@@ -125,7 +126,7 @@ fn main {
 | **v0.2** | ✅ | Router with path params (`:id`) and wildcards (`*`, `:param*`) |
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
-| **v0.5** | ✅ | SSE, request_id - compression, rate_limit, auth_jwt (planned) |
+| **v0.5** | ✅ | SSE, request_id, Bearer Token authentication, request header helpers |
 
 See [specs/roadmap.md](specs/roadmap.md) for detailed plans.
 
