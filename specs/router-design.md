@@ -32,7 +32,7 @@ router
   .put("/user/:id", update_user)
   .delete("/user/:id", delete_user)
 
-app.use(router)
+app.mount(router)
 ```
 
 ### HTTP Methods
@@ -346,7 +346,7 @@ fn main {
       ctx.set_json({"id": id})
     })
 
-  app.use(router.to_middleware())
+  app.mount(router.to_middleware())
   app.listen(":3000")
 }
 ```

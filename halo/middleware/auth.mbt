@@ -33,7 +33,7 @@ fn default_auth_options() -> AuthOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.bearer_auth(fn(token) {
+/// app.mount(@middleware.bearer_auth(fn(token) {
 ///   // Your token validation logic here
 ///   token == "secret-token"
 /// }))
@@ -56,7 +56,7 @@ pub fn bearer_auth(validate_fn : (String) -> Bool) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.bearer_auth_with_options({
+/// app.mount(@middleware.bearer_auth_with_options({
 ///   validate: fn(token) { is_valid_token(token) },
 ///   exclude: ["/public", "/health", "/api/webhook"],
 ///   error_message: "Invalid or expired token",

@@ -6,12 +6,12 @@ async fn main {
   let app = @halo.App::new()
 
   // Core middleware
-  ignore(app.use(@middleware.logger()))
-  ignore(app.use(@middleware.cors_allow_all()))
+  ignore(app.mount(@middleware.logger()))
+  ignore(app.mount(@middleware.cors_allow_all()))
 
   // SSE endpoint
   ignore(
-    app.use(fn(ctx, _) {
+    app.mount(fn(ctx, _) {
       if ctx.req.path == "/events" {
         @helper.sse_set_headers(ctx)
 

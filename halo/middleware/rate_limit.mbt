@@ -56,7 +56,7 @@ let rate_limit_store : Ref[Map[String, RateLimitState]] = { val: Map::new() }
 /// Example:
 /// ```moonbit nocheck
 /// // 100 requests per minute per IP
-/// app.use(@middleware.rate_limit_ip_based(100, 60))
+/// app.mount(@middleware.rate_limit_ip_based(100, 60))
 /// ```
 pub fn rate_limit_ip_based(
   max_requests : Int,
@@ -78,7 +78,7 @@ pub fn rate_limit_ip_based(
 /// Example:
 /// ```moonbit nocheck
 /// // 1000 requests per hour per user
-/// app.use(@middleware.rate_limit_user_based(1000, 3600))
+/// app.mount(@middleware.rate_limit_user_based(1000, 3600))
 /// ```
 pub fn rate_limit_user_based(
   max_requests : Int,
@@ -99,7 +99,7 @@ pub fn rate_limit_user_based(
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.rate_limit_with_options({
+/// app.mount(@middleware.rate_limit_with_options({
 ///   max_requests: 50,
 ///   window_seconds: 60,
 ///   strategy: IpBased,

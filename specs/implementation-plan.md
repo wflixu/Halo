@@ -447,10 +447,10 @@ test "app can be created" {
   assert(app != nil)
 }
 
-test "app.use adds middleware" {
+test "app.mount adds middleware" {
   let app = App::new()
   let mw = fn(ctx: Context, next: Next) async {}
-  app.use(mw)
+  app.mount(mw)
   assert(app.middleware_count() > 0)
 }
 
@@ -558,7 +558,7 @@ fn main {
     println("Response: {ctx.res.status}")
   }
 
-  app.use(logger)
+  app.mount(logger)
 
   // Simple router
   let router = fn(ctx: Context, next: Next) async {
@@ -572,7 +572,7 @@ fn main {
     }
   }
 
-  app.use(router)
+  app.mount(router)
 
   println("Starting Halo server on :3000")
   app.listen(":3000")

@@ -47,7 +47,7 @@ fn default_compression_options() -> CompressionOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.compression())
+/// app.mount(@middleware.compression())
 /// ```
 pub fn compression() -> @halo.Middleware {
   compression_with_options(default_compression_options())
@@ -58,7 +58,7 @@ pub fn compression() -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.compression_with_options({
+/// app.mount(@middleware.compression_with_options({
 ///   gzip: true,
 ///   brotli: false,
 ///   min_size: 512,

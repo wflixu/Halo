@@ -23,7 +23,7 @@ fn default_etag_options() -> EtagOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.etag())
+/// app.mount(@middleware.etag())
 /// ```
 pub fn etag() -> @halo.Middleware {
   etag_with_options(default_etag_options())
@@ -34,7 +34,7 @@ pub fn etag() -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.etag_with_options({
+/// app.mount(@middleware.etag_with_options({
 ///   weak: true,
 ///   min_size: 100,
 /// }))

@@ -6,7 +6,7 @@
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.error_handler())
+/// app.mount(@middleware.error_handler())
 /// // On error: { "error": "error message", "status": 500 }
 /// ```
 pub fn error_handler() -> @halo.Middleware {

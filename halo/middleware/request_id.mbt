@@ -21,7 +21,7 @@ fn default_request_id_options() -> RequestIdOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.request_id())
+/// app.mount(@middleware.request_id())
 ///
 /// // In handler:
 /// let req_id = ctx.state.get("request_id")

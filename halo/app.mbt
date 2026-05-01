@@ -15,7 +15,7 @@ pub fn App::new() -> App {
 ///|
 /// Register middleware (Koa-style API)
 /// Returns self for method chaining
-pub fn App::use(self : App, mw : Middleware) -> App {
+pub fn App::mount(self : App, mw : Middleware) -> App {
   let middlewares = self.middlewares
   middlewares.push(mw)
   { middlewares, }

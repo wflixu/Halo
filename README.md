@@ -40,10 +40,10 @@ async fn main {
   let app = @halo.App::new()
 
   // Logger middleware
-  app.use(@middleware.logger())
+  app.mount(@middleware.logger())
 
   // Routes
-  app.use(fn(ctx, _) {
+  app.mount(fn(ctx, _) {
     if ctx.req.path == "/" {
       ctx.set_body("Hello, Halo!")
     } else if ctx.req.path == "/json" {
@@ -71,18 +71,18 @@ async fn main {
   let app = @halo.App::new()
 
   // Core middleware
-  app.use(@middleware.logger())
-  app.use(@middleware.error_handler())
-  app.use(@middleware.cors_allow_all())
-  app.use(@middleware.secure_headers())
+  app.mount(@middleware.logger())
+  app.mount(@middleware.error_handler())
+  app.mount(@middleware.cors_allow_all())
+  app.mount(@middleware.secure_headers())
 
   // Request parsing
-  app.use(@middleware.body_parser())
-  app.use(@middleware.cookie_parser())
-  app.use(@middleware.session())
+  app.mount(@middleware.body_parser())
+  app.mount(@middleware.cookie_parser())
+  app.mount(@middleware.session())
 
   // Static files
-  app.use(@middleware.static_files("./public"))
+  app.mount(@middleware.static_files("./public"))
 
   // Router
   let router = @router.Router::new()
@@ -96,7 +96,7 @@ async fn main {
       ctx.set_body("Data received")
     })
 
-  app.use(router.to_middleware())
+  app.mount(router.to_middleware())
 
   app.listen(":3000")
 }
@@ -132,7 +132,7 @@ async fn main {
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
 | **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag, timeout, JWT auth |
-| **v0.6** | ✅ | Architecture refactoring: `halo/http` wraps `moonbitlang/async`, `halo` → `halo/http` layered deps; Koa-style `app.use()` API |
+| **v0.6** | ✅ | Architecture refactoring: `halo/http` wraps `moonbitlang/async`, `halo` → `halo/http` layered deps; Koa-style `app.mount()` API |
 
 ## Project Structure
 

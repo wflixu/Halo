@@ -8,19 +8,19 @@ test "app can be created" {
 }
 
 ///|
-test "app.use adds middleware" {
+test "app.mount adds middleware" {
   let app = App::new()
   let mw = fn(_ctx : Context, _next : Next) {  }
-  let app2 = app.use(mw)
+  let app2 = app.mount(mw)
   assert_eq(app2.middleware_count(), 1)
 }
 
 ///|
-test "app.use supports chaining" {
+test "app.mount supports chaining" {
   let app = App::new()
   let mw1 = fn(_ctx : Context, _next : Next) {  }
   let mw2 = fn(_ctx : Context, _next : Next) {  }
-  let app2 = app.use(mw1).use(mw2)
+  let app2 = app.mount(mw1).mount(mw2)
   assert_eq(app2.middleware_count(), 2)
 }
 
@@ -28,7 +28,7 @@ test "app.use supports chaining" {
 test "app.callback processes middleware and returns response" {
   let app = App::new()
   ignore(
-    app.use(fn(ctx : Context, next : Next) {
+    app.mount(fn(ctx : Context, next : Next) {
       ctx.set_body("hello from middleware")
       next()
     }),
@@ -44,7 +44,7 @@ test "app.callback processes middleware and returns response" {
 test "app.callback sets status from middleware" {
   let app = App::new()
   ignore(
-    app.use(fn(ctx : Context, _next : Next) {
+    app.mount(fn(ctx : Context, _next : Next) {
       ctx.set_status(201)
       ctx.set_body("created")
     }),

@@ -6,19 +6,19 @@ async fn main {
   let app = @halo.App::new()
 
   // Core middleware
-  ignore(app.use(@middleware.logger()))
-  ignore(app.use(@middleware.error_handler()))
-  ignore(app.use(@middleware.cors_allow_all()))
+  ignore(app.mount(@middleware.logger()))
+  ignore(app.mount(@middleware.error_handler()))
+  ignore(app.mount(@middleware.cors_allow_all()))
 
   // Bearer Token Authentication (optional)
   // Protects all routes except /public/* and /health
-  // ignore(app.use(@middleware.bearer_auth(fn(token) {
+  // ignore(app.mount(@middleware.bearer_auth(fn(token) {
   //   // Validate token - replace with your own logic
   //   token == "secret-token"
   // })))
 
   // Static files (optional)
-  // ignore(app.use(@middleware.static_files("./public")))
+  // ignore(app.mount(@middleware.static_files("./public")))
 
   // Router with path parameters and wildcards
   let router = @router.Router::new()
@@ -82,7 +82,7 @@ async fn main {
       ctx.set_body("Route not found")
     })
 
-  ignore(app.use(router.to_middleware()))
+  ignore(app.mount(router.to_middleware()))
 
   println("Starting Halo server on :3000")
   app.listen(":3000")

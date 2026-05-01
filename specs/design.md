@@ -124,11 +124,11 @@ moonbitlang/async/http|socket
 - `types.mbt` — `Context`, `Next`, `Middleware` type definitions. Context references `@http.Request` and `@http.Response` (from `halo/http`).
 - `context.mbt` — Context helper methods (`set_body`, `set_status`, etc.) and testing helpers (`make_context`, `make_next`, etc.).
 - `compose.mbt` — Onion model middleware composition (unchanged).
-- `app.mbt` — `App` struct, `use()` middleware registration, `callback()`, `listen()`.
+- `app.mbt` — `App` struct, `mount()` middleware registration, `callback()`, `listen()`.
 
 **Key Design Decisions:**
-- `add_middleware()` renamed to `use()` (Koa-compatible API)
-- `use()` returns `App` for chaining
+- `add_middleware()` renamed to `mount()` (Koa-compatible API)
+- `mount()` returns `App` for chaining
 - `App::listen()` delegates entirely to `@http.Server`
 - No direct reference to `moonbitlang/async` anywhere in this layer
 
@@ -210,16 +210,16 @@ impl Context {
 // Create app
 let app = @halo.App::new()
 
-// Register middleware — use() replaces add_middleware()
-app.use(@middleware.logger())
-app.use(@middleware.cors_allow_all())
-app.use(router.to_middleware())
+// Register middleware — mount() replaces add_middleware()
+app.mount(@middleware.logger())
+app.mount(@middleware.cors_allow_all())
+app.mount(router.to_middleware())
 
 // Start server
 app.listen(":3000")  // or app.listen("127.0.0.1:3000")
 ```
 
-### 5.2 `App::use()` Method
+### 5.2 `App::mount()` Method
 
 ```moonbit
 pub fn App::use(self : App, mw : @halo.Middleware) -> App {

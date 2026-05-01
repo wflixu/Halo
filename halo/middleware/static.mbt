@@ -25,7 +25,7 @@ fn default_static_options() -> StaticOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.static_files("./public"))
+/// app.mount(@middleware.static_files("./public"))
 /// ```
 pub fn static_files(root : String) -> @halo.Middleware {
   let opts = default_static_options()
@@ -42,7 +42,7 @@ pub fn static_files(root : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.static_with_prefix("./assets", "/static"))
+/// app.mount(@middleware.static_with_prefix("./assets", "/static"))
 /// ```
 pub fn static_with_prefix(root : String, prefix : String) -> @halo.Middleware {
   let opts = default_static_options()
@@ -54,7 +54,7 @@ pub fn static_with_prefix(root : String, prefix : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.use(@middleware.static_with_options({
+/// app.mount(@middleware.static_with_options({
 ///   root: "./assets",
 ///   prefix: "/static",
 ///   cache: true,
@@ -158,7 +158,7 @@ fn generate_etag(path : String) -> String {
 ///
 /// Note: This is a placeholder. Actual implementation depends on
 /// MoonBit runtime providing file I/O primitives.
-fn read_file_content(path : String) -> String? {
+fn read_file_content(_path : String) -> String? {
   // Placeholder: In real implementation, this would call MoonBit's
   // file reading API. For now, return None to simulate file not found.
   //
