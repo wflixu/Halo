@@ -124,7 +124,7 @@ fn extract_token(auth_header : String, prefix : String) -> String? {
     let parts_arr = Iter::to_array(parts)
     if Array::length(parts_arr) >= 2 {
       let token_view = Array::get(parts_arr, 1).unwrap_or("".to_string())
-      let token = token_view.to_string()
+      let token = token_view.to_owned()
       if String::length(token) > 0 {
         Some(token)
       } else {
@@ -185,7 +185,7 @@ fn decode_jwt_payload(token : String) -> String {
     // Return payload part (index 1)
     // In production, this would base64url decode
     let payload_view = Array::get(parts_arr, 1).unwrap_or("".to_string())
-    payload_view.to_string()
+    payload_view.to_owned()
   } else {
     ""
   }

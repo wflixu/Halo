@@ -142,7 +142,7 @@ fn get_identifier(ctx : @halo.Context, strategy : RateLimitStrategy) -> String {
           let ips = String::split(ip, ",")
           let arr = ips.to_array()
           if Array::length(arr) > 0 {
-            arr[0].to_string().to_string()
+            arr[0].to_owned().to_string()
           } else {
             "unknown"
           }

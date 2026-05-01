@@ -18,7 +18,7 @@ test "Request::new creates Request with correct method and path" {
 
   assert_eq(req.http_method, "GET")
   assert_eq(req.path, "/test")
-  assert_eq(req.body, Some("body"))
+  assert_eq(req.body.unwrap(), "body")
 }
 
 ///|
@@ -45,7 +45,7 @@ test "Response::new creates response with defaults" {
   let res = Response::new()
 
   assert_eq(res.status.val, 200)
-  assert_eq(res.body.val, None)
+  assert_eq(res.body.val == None, true)
 }
 
 ///|
@@ -56,7 +56,7 @@ test "Response::new_with creates Response with correct values" {
 
   assert_eq(res.status.val, 200)
   assert_eq(res.headers.val["Content-Type"], "text/html")
-  assert_eq(res.body.val, Some("hello"))
+  assert_eq(res.body.val.unwrap(), "hello")
 }
 
 ///|
@@ -94,7 +94,7 @@ test "apply_to_response sets body" {
 
   apply_to_response(res, set_status_fn, set_header_fn, set_body_fn)
 
-  assert_eq(captured_body.val, Some("hello world"))
+  assert_eq(captured_body.val.unwrap(), "hello world")
 }
 
 ///|

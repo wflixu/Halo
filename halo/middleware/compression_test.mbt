@@ -49,7 +49,7 @@ test "compression skips if no Accept-Encoding header" {
 
   // Content-Encoding should not be set
   let encoding = ctx.res.val.headers.val.get("Content-Encoding")
-  assert_eq(encoding, None)
+  assert_eq(encoding == None, true)
 }
 
 ///|
@@ -71,7 +71,7 @@ test "compression skips small responses" {
 
   // Content-Encoding should not be set for small responses
   let encoding = ctx.res.val.headers.val.get("Content-Encoding")
-  assert_eq(encoding, None)
+  assert_eq(encoding == None, true)
 }
 
 ///|

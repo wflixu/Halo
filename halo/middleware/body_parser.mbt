@@ -53,12 +53,12 @@ fn parse_form(body : String) -> Map[String, String] {
   let pairs = String::split(body, "&")
 
   for pair in pairs {
-    let pair_str = pair.to_string()
+    let pair_str = pair.to_owned()
     if pair_str != "" {
       let parts = String::split(pair_str, "=")
       let parts_arr : Array[String] = []
       for p in parts {
-        parts_arr.push(p.to_string())
+        parts_arr.push(p.to_owned())
       }
       if parts_arr.length() >= 2 {
         let key = parts_arr[0]

@@ -116,8 +116,8 @@ fn extract_bearer_token(header : String) -> String? {
   if String::has_prefix(header, "Bearer ") {
     // Extract token after "Bearer " by splitting on space
     let parts = header.split(" ").to_array()
-    if Array::length(parts) == 2 && parts[0].to_string() == "Bearer" {
-      let token = parts[1].to_string()
+    if Array::length(parts) == 2 && parts[0].to_owned() == "Bearer" {
+      let token = parts[1].to_owned()
       if String::length(token) > 0 {
         Some(token)
       } else {

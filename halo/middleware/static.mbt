@@ -82,7 +82,7 @@ pub fn static_with_options(options : StaticOptions) -> @halo.Middleware {
       let parts = String::split(path, options.prefix)
       let arr = parts.to_array()
       if Array::length(arr) > 1 {
-        arr[1].to_string()
+        arr[1].to_owned()
       } else {
         path
       }
@@ -139,7 +139,7 @@ fn get_file_extension(path : String) -> String {
   let parts = String::split(path, ".")
   let arr = parts.to_array()
   if Array::length(arr) > 0 {
-    arr[Array::length(arr) - 1].to_string()
+    arr[Array::length(arr) - 1].to_owned()
   } else {
     ""
   }

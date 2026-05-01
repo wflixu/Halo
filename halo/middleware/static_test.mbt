@@ -58,7 +58,7 @@ test "static middleware blocks directory traversal" {
   // Should block directory traversal
   assert_eq(called.val, false)
   assert_eq(ctx.res.val.status.val, 403)
-  assert_eq(ctx.res.val.body.val, Some("Forbidden"))
+  assert_eq(ctx.res.val.body.val.unwrap(), "Forbidden")
 }
 
 ///|

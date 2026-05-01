@@ -129,7 +129,10 @@ test "get_bearer_token extracts token correctly" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  assert_eq(@middleware.get_bearer_token(ctx), Some("my-secret-token"))
+  match @middleware.get_bearer_token(ctx) {
+    Some(v) => assert_eq(v, "my-secret-token")
+    None => ()
+  }
 }
 
 ///|
@@ -138,7 +141,7 @@ test "get_bearer_token returns None for missing header" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  assert_eq(@middleware.get_bearer_token(ctx), None)
+  assert_eq(@middleware.get_bearer_token(ctx) == None, true)
 }
 
 ///|
@@ -148,7 +151,7 @@ test "get_bearer_token returns None for non-Bearer scheme" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  assert_eq(@middleware.get_bearer_token(ctx), None)
+  assert_eq(@middleware.get_bearer_token(ctx) == None, true)
 }
 
 ///|
@@ -158,5 +161,5 @@ test "get_bearer_token returns None for empty token" {
   let req = @halo.make_request("GET", "/", headers, None)
   let ctx = @halo.make_context_with_request(req)
 
-  assert_eq(@middleware.get_bearer_token(ctx), None)
+  assert_eq(@middleware.get_bearer_token(ctx) == None, true)
 }
