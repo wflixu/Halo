@@ -25,7 +25,7 @@ fn default_static_options() -> StaticOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.static_files("./public"))
+/// app.mount(@middleware.static_files("./public"))
 /// ```
 pub fn static_files(root : String) -> @halo.Middleware {
   let opts = default_static_options()
@@ -42,7 +42,7 @@ pub fn static_files(root : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.static_with_prefix("./assets", "/static"))
+/// app.mount(@middleware.static_with_prefix("./assets", "/static"))
 /// ```
 pub fn static_with_prefix(root : String, prefix : String) -> @halo.Middleware {
   let opts = default_static_options()
@@ -54,7 +54,7 @@ pub fn static_with_prefix(root : String, prefix : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.static_with_options({
+/// app.mount(@middleware.static_with_options({
 ///   root: "./assets",
 ///   prefix: "/static",
 ///   cache: true,
@@ -82,7 +82,7 @@ pub fn static_with_options(options : StaticOptions) -> @halo.Middleware {
       let parts = String::split(path, options.prefix)
       let arr = parts.to_array()
       if Array::length(arr) > 1 {
-        arr[1].to_string()
+        arr[1].to_owned()
       } else {
         path
       }
@@ -139,7 +139,7 @@ fn get_file_extension(path : String) -> String {
   let parts = String::split(path, ".")
   let arr = parts.to_array()
   if Array::length(arr) > 0 {
-    arr[Array::length(arr) - 1].to_string()
+    arr[Array::length(arr) - 1].to_owned()
   } else {
     ""
   }
@@ -158,7 +158,7 @@ fn generate_etag(path : String) -> String {
 ///
 /// Note: This is a placeholder. Actual implementation depends on
 /// MoonBit runtime providing file I/O primitives.
-fn read_file_content(path : String) -> String? {
+fn read_file_content(_path : String) -> String? {
   // Placeholder: In real implementation, this would call MoonBit's
   // file reading API. For now, return None to simulate file not found.
   //

@@ -46,7 +46,7 @@ fn parse_pattern(pattern : String) -> (Array[(String, Bool)], Bool, String?) {
   let mut wildcard_name : String? = None
 
   for part in parts_iter {
-    let part_str = part.to_string()
+    let part_str = part.to_owned()
 
     if part_str == "" {
       continue
@@ -54,12 +54,12 @@ fn parse_pattern(pattern : String) -> (Array[(String, Bool)], Bool, String?) {
 
     if String::has_prefix(part_str, ":") {
       if String::has_suffix(part_str, "*") {
-        let name = part_str[1:-1].to_string()
+        let name = part_str[1:-1].to_owned()
         segments.push((name, true))
         has_wildcard = true
         wildcard_name = Some(name)
       } else {
-        let name = part_str[1:].to_string()
+        let name = part_str[1:].to_owned()
         segments.push((name, true))
       }
     } else if part_str == "*" {
@@ -98,7 +98,7 @@ pub fn Route::do_match(self : Route, path : String) -> MatchResult {
   let path_iter = String::split(path, "/")
   let path_parts : Array[String] = []
   for p in path_iter {
-    let s = p.to_string()
+    let s = p.to_owned()
     if s != "" {
       path_parts.push(s)
     }

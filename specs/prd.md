@@ -216,8 +216,8 @@ API 设计
 
 let app = Halo.new()
 
-app.use(logger)
-app.use(router)
+app.mount(logger)
+app.mount(router)
 
 app.listen(":3000")
 
@@ -278,7 +278,7 @@ router.get("/user/:id", handler)
 
 3.6 Error Handling
 
-app.use(errorHandler)
+app.mount(errorHandler)
 
 要求：
 	•	捕获所有异常

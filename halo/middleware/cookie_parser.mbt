@@ -6,7 +6,7 @@
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.cookie_parser())
+/// app.mount(@middleware.cookie_parser())
 ///
 /// // In handler:
 /// let session_id = ctx.state.get("cookie:session_id")
@@ -38,14 +38,14 @@ fn parse_cookies(header : String) -> Map[String, String] {
   let pairs = String::split(header, ";")
 
   for pair in pairs {
-    let pair_str = pair.to_string()
+    let pair_str = pair.to_owned()
     // Trim leading space
-    let trimmed = String::trim(pair_str).to_string()
+    let trimmed = String::trim(pair_str).to_owned()
     if trimmed != "" {
       let parts = String::split(trimmed, "=")
       let parts_arr : Array[String] = []
       for p in parts {
-        parts_arr.push(p.to_string())
+        parts_arr.push(p.to_owned())
       }
       if parts_arr.length() >= 2 {
         let key = parts_arr[0]

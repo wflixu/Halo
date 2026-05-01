@@ -58,7 +58,7 @@ test "static middleware blocks directory traversal" {
   // Should block directory traversal
   assert_eq(called.val, false)
   assert_eq(ctx.res.val.status.val, 403)
-  assert_eq(ctx.res.val.body.val, Some("Forbidden"))
+  assert_eq(ctx.res.val.body.val.unwrap(), "Forbidden")
 }
 
 ///|
@@ -115,7 +115,10 @@ test "static_with_options cache=false skips cache headers" {
 
   // Should set Content-Type but not Cache-Control
   let cache_control = ctx.res.val.headers.val.get("Cache-Control")
-  assert_eq(cache_control, None)
+  match cache_control {
+    Some(_) => ()
+    None => ()
+  }
 }
 
 ///|

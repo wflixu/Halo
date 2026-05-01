@@ -20,7 +20,7 @@ fn default_session_options() -> SessionOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.session())
+/// app.mount(@middleware.session())
 ///
 /// // In handler:
 /// let user_id = @middleware.session_get(ctx, "user_id")
@@ -32,7 +32,7 @@ pub fn session() -> @halo.Middleware {
 
 ///|
 /// Session middleware with custom options
-pub fn session_with_options(options : SessionOptions) -> @halo.Middleware {
+pub fn session_with_options(_options : SessionOptions) -> @halo.Middleware {
   fn(ctx : @halo.Context, next : @halo.Next) {
     // Initialize session data in context state
     ctx.state["session_data"] = ""
@@ -54,7 +54,7 @@ pub fn session_set(ctx : @halo.Context, key : String, value : String) -> Unit {
 
 ///|
 /// Delete session value
-pub fn session_delete(ctx : @halo.Context, key : String) -> Unit {
+pub fn session_delete(ctx : @halo.Context, _key : String) -> Unit {
   // Sessions are stored in ctx.state, removal depends on Map API
   ignore(ctx.state)
 }

@@ -1,4 +1,4 @@
-// src/halo/app.mbt
+// halo/app.mbt
 // App module for Halo web framework
 
 ///|
@@ -13,9 +13,9 @@ pub fn App::new() -> App {
 }
 
 ///|
-/// Add middleware to the app
+/// Register middleware (Koa-style API)
 /// Returns self for method chaining
-pub fn App::add_middleware(self : App, mw : Middleware) -> App {
+pub fn App::mount(self : App, mw : Middleware) -> App {
   let middlewares = self.middlewares
   middlewares.push(mw)
   { middlewares, }
@@ -28,25 +28,23 @@ pub fn App::middleware_count(self : App) -> Int {
 }
 
 ///|
-/// Start the server with the given address
-pub fn App::listen(self : App, _address : String) -> Unit {
-  let handler = self.callback()
-  // The handler can be passed to Server::start from the http package
-  // For now, just print the address to indicate the server would start
-  println("Server would start on {_address}")
-  let _ = handler
+/// Create the request handler function (internal use)
+pub fn App::callback(self : App) -> (@http.Request) -> @http.Response {
+  let composed = compose(self.middlewares)
+
+  fn(req : @http.Request) -> @http.Response {
+    let ctx = make_context_with_request(req)
+    composed(ctx, make_next())
+    ctx.res.val
+  }
 }
 
 ///|
-/// Create the request handler function (internal use)
-fn App::callback(self : App) -> (Request) -> Response {
-  let composed = compose(self.middlewares)
-
-  fn(req : Request) -> Response {
-    let ctx = make_context()
-    // Create new context with updated req (structs are immutable)
-    let ctx_with_req = { req, res: ctx.res, state: ctx.state }
-    composed(ctx_with_req, make_next())
-    ctx_with_req.res.val
-  }
+/// Start the server listening on the given address
+/// Delegates to @http.Server for HTTP handling
+pub async fn App::listen(self : App, address : String) -> Unit {
+  let handler = self.callback()
+  let server = @http.Server::new(address)
+  println("Starting Halo server on {address}")
+  server.run_forever(handler)
 }

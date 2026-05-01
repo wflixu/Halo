@@ -81,7 +81,7 @@ test "etag skips ETag for empty body" {
 
   let etag = ctx.res.val.headers.val.get("ETag")
   // Empty body should not get an ETag (min_size is 1 by default, empty string has length 0)
-  assert_eq(etag, None)
+  assert_eq(etag == None, true)
 }
 
 ///|
@@ -97,7 +97,7 @@ test "etag respects min_size option" {
 
   let etag = ctx.res.val.headers.val.get("ETag")
   // Body is smaller than min_size, no ETag should be set
-  assert_eq(etag, None)
+  assert_eq(etag == None, true)
 }
 
 ///|

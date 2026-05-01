@@ -39,7 +39,7 @@ fn default_jwt_auth_options() -> JwtAuthOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.jwt_auth("your-secret-key"))
+/// app.mount(@middleware.jwt_auth("your-secret-key"))
 /// ```
 ///
 /// On missing or invalid token, returns 401 Unauthorized
@@ -60,7 +60,7 @@ pub fn jwt_auth(secret : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.jwt_auth_with_options({
+/// app.mount(@middleware.jwt_auth_with_options({
 ///   secret: "your-secret-key",
 ///   exclude: ["/public", "/health", "/api/webhook"],
 ///   error_message: "Invalid or expired token",
@@ -124,7 +124,7 @@ fn extract_token(auth_header : String, prefix : String) -> String? {
     let parts_arr = Iter::to_array(parts)
     if Array::length(parts_arr) >= 2 {
       let token_view = Array::get(parts_arr, 1).unwrap_or("".to_string())
-      let token = token_view.to_string()
+      let token = token_view.to_owned()
       if String::length(token) > 0 {
         Some(token)
       } else {
@@ -185,7 +185,7 @@ fn decode_jwt_payload(token : String) -> String {
     // Return payload part (index 1)
     // In production, this would base64url decode
     let payload_view = Array::get(parts_arr, 1).unwrap_or("".to_string())
-    payload_view.to_string()
+    payload_view.to_owned()
   } else {
     ""
   }

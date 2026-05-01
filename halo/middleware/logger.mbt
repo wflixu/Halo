@@ -6,7 +6,7 @@
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.logger())
+/// app.mount(@middleware.logger())
 /// // Output: GET /users -> 200
 /// ```
 pub fn logger() -> @halo.Middleware {

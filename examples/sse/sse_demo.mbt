@@ -2,16 +2,16 @@
 // Server-Sent Events (SSE) demo
 
 ///|
-fn main {
+async fn main {
   let app = @halo.App::new()
 
   // Core middleware
-  ignore(app.add_middleware(@middleware.logger()))
-  ignore(app.add_middleware(@middleware.cors_allow_all()))
+  ignore(app.mount(@middleware.logger()))
+  ignore(app.mount(@middleware.cors_allow_all()))
 
   // SSE endpoint
   ignore(
-    app.add_middleware(fn(ctx, _) {
+    app.mount(fn(ctx, _) {
       if ctx.req.path == "/events" {
         @helper.sse_set_headers(ctx)
 

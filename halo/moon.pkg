@@ -1,1 +1,5 @@
-// halo/moon.pkg - Package configuration for halo
+import {
+  "wflixu/Halo/halo/http" @http,
+}
+
+supported_targets = "native"

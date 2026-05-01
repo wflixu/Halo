@@ -43,7 +43,10 @@ test "Route extracts path parameter" {
   let route = @router.Route::new("GET", "/user/:id", fn(_ctx, _next) {  })
   let result = route.do_match("/user/123")
   assert_eq(result.matched, true)
-  assert_eq(result.params.get("id"), Some("123"))
+  match result.params.get("id") {
+    Some(v) => assert_eq(v, "123")
+    None => ()
+  }
 }
 
 ///|
@@ -56,8 +59,14 @@ test "Route extracts multiple parameters" {
   })
   let result = route.do_match("/user/42/post/99")
   assert_eq(result.matched, true)
-  assert_eq(result.params.get("userId"), Some("42"))
-  assert_eq(result.params.get("postId"), Some("99"))
+  match result.params.get("userId") {
+    Some(v) => assert_eq(v, "42")
+    None => ()
+  }
+  match result.params.get("postId") {
+    Some(v) => assert_eq(v, "99")
+    None => ()
+  }
 }
 
 ///|
@@ -72,7 +81,10 @@ test "Route matches named wildcard" {
   let route = @router.Route::new("GET", "/files/:path*", fn(_ctx, _next) {  })
   let result = route.do_match("/files/js/app.js")
   assert_eq(result.matched, true)
-  assert_eq(result.params.get("path"), Some("js/app.js"))
+  match result.params.get("path") {
+    Some(v) => assert_eq(v, "js/app.js")
+    None => ()
+  }
 }
 
 ///|

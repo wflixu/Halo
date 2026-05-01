@@ -33,7 +33,7 @@ fn default_auth_options() -> AuthOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.bearer_auth(fn(token) {
+/// app.mount(@middleware.bearer_auth(fn(token) {
 ///   // Your token validation logic here
 ///   token == "secret-token"
 /// }))
@@ -56,7 +56,7 @@ pub fn bearer_auth(validate_fn : (String) -> Bool) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.bearer_auth_with_options({
+/// app.mount(@middleware.bearer_auth_with_options({
 ///   validate: fn(token) { is_valid_token(token) },
 ///   exclude: ["/public", "/health", "/api/webhook"],
 ///   error_message: "Invalid or expired token",
@@ -116,8 +116,8 @@ fn extract_bearer_token(header : String) -> String? {
   if String::has_prefix(header, "Bearer ") {
     // Extract token after "Bearer " by splitting on space
     let parts = header.split(" ").to_array()
-    if Array::length(parts) == 2 && parts[0].to_string() == "Bearer" {
-      let token = parts[1].to_string()
+    if Array::length(parts) == 2 && parts[0].to_owned() == "Bearer" {
+      let token = parts[1].to_owned()
       if String::length(token) > 0 {
         Some(token)
       } else {

@@ -8,25 +8,50 @@ test "app can be created" {
 }
 
 ///|
-test "app.add_middleware adds middleware" {
+test "app.mount adds middleware" {
   let app = App::new()
   let mw = fn(_ctx : Context, _next : Next) {  }
-  let app2 = app.add_middleware(mw)
+  let app2 = app.mount(mw)
   assert_eq(app2.middleware_count(), 1)
 }
 
 ///|
-test "app.add_middleware supports chaining" {
+test "app.mount supports chaining" {
   let app = App::new()
   let mw1 = fn(_ctx : Context, _next : Next) {  }
   let mw2 = fn(_ctx : Context, _next : Next) {  }
-  let app2 = app.add_middleware(mw1).add_middleware(mw2)
+  let app2 = app.mount(mw1).mount(mw2)
   assert_eq(app2.middleware_count(), 2)
 }
 
 ///|
-test "app.listen starts server" {
+test "app.callback processes middleware and returns response" {
   let app = App::new()
-  app.listen(":3000")
-  // This should not error
+  ignore(
+    app.mount(fn(ctx : Context, next : Next) {
+      ctx.set_body("hello from middleware")
+      next()
+    }),
+  )
+  let handler = app.callback()
+  let req = make_request("GET", "/", Map::new(), None)
+  let res = handler(req)
+  assert_eq(res.body.val.unwrap(), "hello from middleware")
+  assert_eq(res.status.val, 200)
+}
+
+///|
+test "app.callback sets status from middleware" {
+  let app = App::new()
+  ignore(
+    app.mount(fn(ctx : Context, _next : Next) {
+      ctx.set_status(201)
+      ctx.set_body("created")
+    }),
+  )
+  let handler = app.callback()
+  let req = make_request("GET", "/", Map::new(), None)
+  let res = handler(req)
+  assert_eq(res.status.val, 201)
+  assert_eq(res.body.val.unwrap(), "created")
 }
