@@ -17,11 +17,14 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
+      - name: Update registry index
+        run: moon update
+
       - name: Build
-        run: moon build
+        run: moon build --target native
 
       - name: Test
-        run: moon test
+        run: moon test --target native
 
   fmt:
     runs-on: ubuntu-latest
