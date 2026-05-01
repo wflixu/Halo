@@ -5,8 +5,8 @@ import {
 
 options(
   targets: {
-    "request.mbt": ["native"],
-    "response.mbt": ["native"],
-    "server.mbt": ["native"],
+    "request.mbt": [ "native" ],
+    "response.mbt": [ "native" ],
+    "server.mbt": [ "native" ],
   },
 )

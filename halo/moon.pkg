@@ -3,7 +3,5 @@ import {
 }
 
 options(
-  targets: {
-    "app.mbt": ["native"],
-  },
+  targets: { "app.mbt": [ "native" ] },
 )

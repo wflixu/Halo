@@ -8,7 +8,5 @@ import {
 
 options(
   "is-main": true,
-  targets: {
-    "sse_demo.mbt": ["native"],
-  },
+  targets: { "sse_demo.mbt": [ "native" ] },
 )
