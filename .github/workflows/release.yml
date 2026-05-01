@@ -35,6 +35,9 @@ jobs:
             exit 1
           fi
 
+      - name: Update registry index
+        run: moon update
+
       - name: Publish to mooncakes.io
         run: |
           moon publish
