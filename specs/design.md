@@ -64,7 +64,7 @@ Request → Middleware[0].before
          │               │               │
          ▼               ▼               ▼
    ┌──────────┐   ┌──────────┐   ┌──────────┐
-   │ Compose  │   │ Context  │   │  Server  │
+   │ Compose  │   │ Context  │   │   http/  │
    └────┬─────┘   └────┬─────┘   └────┬─────┘
         │              │              │
         │              │              │
@@ -79,13 +79,10 @@ Request → Middleware[0].before
 
 | Module | Responsibility |
 |--------|----------------|
-| `types.mb` | Core type definitions |
-| `compose.mb` | Middleware composition engine |
-| `app.mb` | Application entry point, middleware registration |
-| `context.mb` | Request/Response context encapsulation |
-| `http/server.mb` | HTTP server lifecycle |
-| `http/request.mb` | Request wrapper |
-| `http/response.mb` | Response wrapper |
+| `halo/types.mbt` | Core type definitions |
+| `halo/compose.mbt` | Middleware composition engine |
+| `halo/app.mbt` | Application entry point, middleware registration, listen() |
+| `halo/context.mbt` | Context helper methods |
 
 ---
 
@@ -128,7 +125,7 @@ struct App {
 
 impl App {
   fn new() -> Self
-  fn use(self, mw: Middleware) -> Self
+  fn add_middleware(self, mw: Middleware) -> Self
   fn listen(self, address: String) -> Unit
 }
 ```
@@ -208,12 +205,12 @@ struct Response {
        │
        ▼
 ┌──────────────┐
-│ wrap_request │ → Request {method, path, headers, body}
+│ @async/http  │ → request (native type)
 └──────┬───────┘
        │
        ▼
 ┌──────────────┐
-│ Context::new │ → Context {req, res, state}
+│wrap_from_http│ → Halo Request {method, path, headers, body}
 └──────┬───────┘
        │
        ▼
@@ -223,8 +220,7 @@ struct Response {
        │
        ▼
 ┌──────────────┐
-│ apply_to_    │ → Write to HTTP Response
-│   response   │
+│send_to_conn  │ → Write to @async/http connection
 └──────────────┘
 ```
 

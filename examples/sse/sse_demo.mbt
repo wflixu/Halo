@@ -2,7 +2,7 @@
 // Server-Sent Events (SSE) demo
 
 ///|
-fn main {
+async fn main {
   let app = @halo.App::new()
 
   // Core middleware

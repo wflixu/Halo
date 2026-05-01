@@ -3,8 +3,11 @@ import {
   "wflixu/Halo/halo",
   "wflixu/Halo/halo/middleware",
   "wflixu/Halo/halo/helper",
+  "moonbitlang/async",
 }
 
 options(
   "is-main": true,
 )
+
+supported_targets = "native"

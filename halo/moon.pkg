@@ -1,1 +1,7 @@
 // halo/moon.pkg - Package configuration for halo
+import {
+  "moonbitlang/async/http" @http,
+  "moonbitlang/async/socket" @socket,
+}
+
+supported_targets = "native"

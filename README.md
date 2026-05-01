@@ -36,7 +36,7 @@ Add to your `moon.mod.json`:
 use wflixu/Halo/halo
 use wflixu/Halo/halo/middleware
 
-fn main {
+async fn main {
   let app = @halo.App::new()
 
   // Logger middleware
@@ -67,7 +67,7 @@ use wflixu/Halo/halo
 use wflixu/Halo/halo/middleware
 use wflixu/Halo/halo/router
 
-fn main {
+async fn main {
   let app = @halo.App::new()
 
   // Core middleware
@@ -139,37 +139,37 @@ fn main {
 wflixu/Halo/
 ├── moon.mod.json              # Module definition
 ├── halo/                      # Core package
-│   ├── types.mbt              # Context, Request, Response, Middleware
+│   ├── types.mbt             # Request, Response, Context, Middleware
 │   ├── compose.mbt            # Onion model composition
-│   ├── app.mbt                # App::new(), add_middleware(), listen()
-│   └── http/                  # HTTP server wrappers
-├── halo/router/               # Router middleware
-│   ├── router.mbt             # HTTP method routing
-│   ├── route.mbt              # Path matching
-│   └── router_test.mbt
+│   ├── app.mbt               # App::new(), add_middleware(), listen()
+│   ├── context.mbt           # Context methods
+│   └── router/               # Router middleware
+│       ├── router.mbt         # HTTP method routing
+│       ├── route.mbt         # Path matching
+│       └── router_test.mbt
 ├── halo/middleware/           # Built-in middleware
-│   ├── logger.mbt             # Request logging
-│   ├── error_handler.mbt      # Unified error handling
-│   ├── cors.mbt               # CORS support
-│   ├── static.mbt             # Static file serving
+│   ├── logger.mbt            # Request logging
+│   ├── error_handler.mbt     # Unified error handling
+│   ├── cors.mbt              # CORS support
+│   ├── static.mbt            # Static file serving
 │   ├── body_parser.mbt        # JSON/form body parsing
 │   ├── cookie_parser.mbt      # Cookie parsing
 │   ├── session.mbt            # Session management
 │   ├── secure_headers.mbt     # Security headers
 │   ├── request_id.mbt         # Request tracing ID
-│   ├── auth.mbt               # Bearer Token authentication
-│   ├── rate_limit.mbt         # Rate limiting (IP/user-based)
+│   ├── auth.mbt              # Bearer Token authentication
+│   ├── rate_limit.mbt        # Rate limiting (IP/user-based)
 │   ├── compression.mbt        # Response compression (gzip/brotli)
-│   ├── etag.mbt               # ETag generation for caching
+│   ├── etag.mbt              # ETag generation for caching
 │   ├── timeout.mbt            # Request timeout handling
-│   └── jwt_auth.mbt           # JWT token validation
-├── halo/helper/               # Helpers
+│   └── jwt_auth.mbt          # JWT token validation
+├── halo/helper/              # Helpers
 │   └── sse.mbt                # Server-Sent Events
-├── examples/                  # Examples
+├── examples/                 # Examples
 │   ├── demo.mbt
 │   └── sse/
 │       └── sse_demo.mbt
-└── specs/                     # Documentation
+└── specs/                    # Documentation
     ├── design.md
     └── router-design.md
 ```

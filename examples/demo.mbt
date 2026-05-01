@@ -2,7 +2,7 @@
 // Demo application showcasing Halo v0.3 features
 
 ///|
-fn main {
+async fn main {
   let app = @halo.App::new()
 
   // Core middleware
