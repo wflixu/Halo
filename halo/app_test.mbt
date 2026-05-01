@@ -36,7 +36,7 @@ test "app.callback processes middleware and returns response" {
   let handler = app.callback()
   let req = make_request("GET", "/", Map::new(), None)
   let res = handler(req)
-  assert_eq(res.body.val, Some("hello from middleware"))
+  assert_eq(res.body.val.unwrap(), "hello from middleware")
   assert_eq(res.status.val, 200)
 }
 
@@ -53,5 +53,5 @@ test "app.callback sets status from middleware" {
   let req = make_request("GET", "/", Map::new(), None)
   let res = handler(req)
   assert_eq(res.status.val, 201)
-  assert_eq(res.body.val, Some("created"))
+  assert_eq(res.body.val.unwrap(), "created")
 }

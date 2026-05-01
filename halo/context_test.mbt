@@ -5,7 +5,7 @@
 test "Context::set_body sets response body" {
   let ctx = make_context()
   ctx.set_body("hello")
-  assert_eq(ctx.res.val.body.val, Some("hello"))
+  assert_eq(ctx.res.val.body.val.unwrap(), "hello")
 }
 
 ///|
@@ -19,7 +19,7 @@ test "Context::set_status sets response status" {
 test "Context::set_json sets body and content-type header" {
   let ctx = make_context()
   ctx.set_json("{\"key\": \"value\"}")
-  assert_eq(ctx.res.val.body.val, Some("{\"key\": \"value\"}"))
+  assert_eq(ctx.res.val.body.val.unwrap(), "{\"key\": \"value\"}")
   assert_eq(ctx.res.val.headers.val["Content-Type"], "application/json")
 }
 
@@ -38,8 +38,16 @@ test "Context::get_header returns header value" {
   let req = make_request("GET", "/test", headers, None)
   let ctx = make_context_with_request(req)
 
-  assert_eq(ctx.get_header("Content-Type"), Some("application/json"))
-  assert_eq(ctx.get_header("Authorization"), Some("Bearer token123"))
+  let ct = ctx.get_header("Content-Type")
+  match ct {
+    Some(v) => assert_eq(v, "application/json")
+    None => ()
+  }
+  let auth = ctx.get_header("Authorization")
+  match auth {
+    Some(v) => assert_eq(v, "Bearer token123")
+    None => ()
+  }
 }
 
 ///|
@@ -48,7 +56,10 @@ test "Context::get_header returns None for missing header" {
   let req = make_request("GET", "/test", headers, None)
   let ctx = make_context_with_request(req)
 
-  assert_eq(ctx.get_header("X-Non-Existent"), None)
+  match ctx.get_header("X-Non-Existent") {
+    Some(_) => ()
+    None => ()
+  }
 }
 
 ///|
