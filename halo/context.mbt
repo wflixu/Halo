@@ -1,0 +1,90 @@
+// halo/context.mbt
+// Context methods and helper constructors for Halo web framework
+
+///|
+/// Helper to create context for testing
+pub fn make_context() -> Context {
+  let req = @http.Request::new("GET", "/", Map::new(), None)
+  let res : Ref[@http.Response] = { val: @http.Response::new() }
+  { req, res, state: Map::new() }
+}
+
+///|
+/// Helper to create a no-op next function
+pub fn make_next() -> Next {
+  fn() {  }
+}
+
+///|
+/// Helper to create a Request
+pub fn make_request(
+  http_method : String,
+  path : String,
+  headers : Map[String, String],
+  body : String?,
+) -> @http.Request {
+  @http.Request::new(http_method, path, headers, body)
+}
+
+///|
+/// Helper to create a Response
+pub fn make_response(
+  status : Int,
+  headers : Map[String, String],
+  body : String?,
+) -> @http.Response {
+  @http.Response::new_with(status, headers, body)
+}
+
+///|
+/// Helper to create context with custom request
+pub fn make_context_with_request(req : @http.Request) -> Context {
+  { req, res: { val: @http.Response::new() }, state: Map::new() }
+}
+
+///|
+/// Set the response body
+pub fn Context::set_body(self : Context, body : String) -> Unit {
+  self.res.val.body.val = Some(body)
+}
+
+///|
+/// Set the response status code
+pub fn Context::set_status(self : Context, status : Int) -> Unit {
+  self.res.val.status.val = status
+}
+
+///|
+/// Set the response JSON body with appropriate content-type header
+pub fn Context::set_json(self : Context, json_str : String) -> Unit {
+  self.res.val.headers.val["Content-Type"] = "application/json"
+  self.res.val.body.val = Some(json_str)
+}
+
+///|
+/// Get a request header value by name (returns None if not found)
+pub fn Context::get_header(self : Context, name : String) -> String? {
+  self.req.headers.get(name)
+}
+
+///|
+/// Get a request header value with a default fallback
+pub fn Context::get_header_or(
+  self : Context,
+  name : String,
+  default : String,
+) -> String {
+  match self.req.headers.get(name) {
+    Some(value) => value
+    None => default
+  }
+}
+
+///|
+/// Check if a request header exists
+pub fn Context::has_header(self : Context, name : String) -> Bool {
+  match self.req.headers.get(name) {
+    Some(_) => true
+    None => false
+  }
+}

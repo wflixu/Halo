@@ -1,12 +1,26 @@
-// tests/types_test.mbt
-// Blackbox tests for types module
+// halo/context_test.mbt
+// Blackbox tests for context methods and helpers
 
 ///|
-test "Context has req and res" {
+test "Context::set_body sets response body" {
   let ctx = make_context()
-  // ctx.req and ctx.res should exist (they're structs, not Options)
-  let _ = ctx.req
-  let _ = ctx.res
+  ctx.set_body("hello")
+  assert_eq(ctx.res.val.body.val, Some("hello"))
+}
+
+///|
+test "Context::set_status sets response status" {
+  let ctx = make_context()
+  ctx.set_status(404)
+  assert_eq(ctx.res.val.status.val, 404)
+}
+
+///|
+test "Context::set_json sets body and content-type header" {
+  let ctx = make_context()
+  ctx.set_json("{\"key\": \"value\"}")
+  assert_eq(ctx.res.val.body.val, Some("{\"key\": \"value\"}"))
+  assert_eq(ctx.res.val.headers.val["Content-Type"], "application/json")
 }
 
 ///|
@@ -14,13 +28,6 @@ test "Context state is mutable" {
   let ctx = make_context()
   ctx.state["key"] = "value"
   assert_eq(ctx.state["key"], "value")
-}
-
-///|
-test "Next is created" {
-  let next = make_next()
-  // next should exist
-  let _ = next
 }
 
 ///|

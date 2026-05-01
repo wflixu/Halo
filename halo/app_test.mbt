@@ -25,8 +25,33 @@ test "app.use supports chaining" {
 }
 
 ///|
-test "app.callback creates handler function" {
+test "app.callback processes middleware and returns response" {
   let app = App::new()
-  let _handler = app.callback()
-  // Handler should be a function (Request) -> Response
+  ignore(
+    app.use(fn(ctx : Context, next : Next) {
+      ctx.set_body("hello from middleware")
+      next()
+    }),
+  )
+  let handler = app.callback()
+  let req = make_request("GET", "/", Map::new(), None)
+  let res = handler(req)
+  assert_eq(res.body.val, Some("hello from middleware"))
+  assert_eq(res.status.val, 200)
+}
+
+///|
+test "app.callback sets status from middleware" {
+  let app = App::new()
+  ignore(
+    app.use(fn(ctx : Context, _next : Next) {
+      ctx.set_status(201)
+      ctx.set_body("created")
+    }),
+  )
+  let handler = app.callback()
+  let req = make_request("GET", "/", Map::new(), None)
+  let res = handler(req)
+  assert_eq(res.status.val, 201)
+  assert_eq(res.body.val, Some("created"))
 }

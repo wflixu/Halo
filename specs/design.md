@@ -122,6 +122,7 @@ moonbitlang/async/http|socket
 
 **Files:**
 - `types.mbt` — `Context`, `Next`, `Middleware` type definitions. Context references `@http.Request` and `@http.Response` (from `halo/http`).
+- `context.mbt` — Context helper methods (`set_body`, `set_status`, etc.) and testing helpers (`make_context`, `make_next`, etc.).
 - `compose.mbt` — Onion model middleware composition (unchanged).
 - `app.mbt` — `App` struct, `use()` middleware registration, `callback()`, `listen()`.
 
