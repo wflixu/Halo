@@ -28,7 +28,7 @@ fn default_secure_headers_options() -> SecureHeadersOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.secure_headers())
+/// app.use(@middleware.secure_headers())
 /// ```
 pub fn secure_headers() -> @halo.Middleware {
   secure_headers_with_options(default_secure_headers_options())

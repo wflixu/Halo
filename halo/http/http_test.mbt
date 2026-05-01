@@ -1,22 +1,20 @@
-// src/halo/http/http_test.mbt
-// Blackbox tests for http package
+// halo/http/http_test.mbt
+// Blackbox tests for halo/http package
 
 ///|
 test "server can be created" {
-  let server = Server::new(":3000")
-  assert_eq(server.get_address(), ":3000")
+  let _server = Server::new(":3000")
 }
 
 ///|
-test "server address is stored correctly" {
-  let server = Server::new("localhost:8080")
-  assert_eq(server.get_address(), "localhost:8080")
+test "server can be created with full address" {
+  let _server = Server::new("localhost:8080")
 }
 
 ///|
-test "wrap_request creates Request with correct method and path" {
+test "Request::new creates Request with correct method and path" {
   let headers = Map::new()
-  let req = wrap_request("GET", "/test", headers, Some("body"))
+  let req = Request::new("GET", "/test", headers, Some("body"))
 
   assert_eq(req.http_method, "GET")
   assert_eq(req.path, "/test")
@@ -24,39 +22,48 @@ test "wrap_request creates Request with correct method and path" {
 }
 
 ///|
-test "wrap_request parses headers correctly" {
+test "Request::new parses headers correctly" {
   let headers = Map::new()
   headers["Content-Type"] = "application/json"
   headers["Authorization"] = "Bearer token"
-  let req = wrap_request("POST", "/api", headers, None)
+  let req = Request::new("POST", "/api", headers, None)
 
   assert_eq(req.headers["Content-Type"], "application/json")
   assert_eq(req.headers["Authorization"], "Bearer token")
 }
 
 ///|
-test "wrap_request handles empty headers" {
+test "Request::new handles empty headers" {
   let headers = Map::new()
-  let req = wrap_request("GET", "/", headers, None)
+  let req = Request::new("GET", "/", headers, None)
 
   assert_eq(req.headers.length(), 0)
 }
 
 ///|
-test "wrap_response creates Response with correct status" {
-  let headers = Map::new()
-  headers["Content-Type"] = "text/html"
-  let res = wrap_response(200, headers)
+test "Response::new creates response with defaults" {
+  let res = Response::new()
 
   assert_eq(res.status.val, 200)
-  assert_eq(res.headers.val["Content-Type"], "text/html")
+  assert_eq(res.body.val, None)
 }
 
 ///|
-test "wrap_response handles different status codes" {
+test "Response::new_with creates Response with correct values" {
   let headers = Map::new()
-  let res_404 = wrap_response(404, headers)
-  let res_500 = wrap_response(500, headers)
+  headers["Content-Type"] = "text/html"
+  let res = Response::new_with(200, headers, Some("hello"))
+
+  assert_eq(res.status.val, 200)
+  assert_eq(res.headers.val["Content-Type"], "text/html")
+  assert_eq(res.body.val, Some("hello"))
+}
+
+///|
+test "Response::new_with handles different status codes" {
+  let headers = Map::new()
+  let res_404 = Response::new_with(404, headers, None)
+  let res_500 = Response::new_with(500, headers, None)
 
   assert_eq(res_404.status.val, 404)
   assert_eq(res_500.status.val, 500)
@@ -64,7 +71,7 @@ test "wrap_response handles different status codes" {
 
 ///|
 test "apply_to_response sets status" {
-  let res = @halo.make_response(201, Map::new(), Some("created"))
+  let res = Response::new_with(201, Map::new(), Some("created"))
 
   let captured_status : Ref[Int] = { val: 0 }
   let set_status_fn = fn(status : Int) { captured_status.val = status }
@@ -78,7 +85,7 @@ test "apply_to_response sets status" {
 
 ///|
 test "apply_to_response sets body" {
-  let res = @halo.make_response(200, Map::new(), Some("hello world"))
+  let res = Response::new_with(200, Map::new(), Some("hello world"))
 
   let captured_body : Ref[String?] = { val: None }
   let set_status_fn = fn(_status : Int) {  }
@@ -95,7 +102,7 @@ test "apply_to_response sets headers" {
   let headers = Map::new()
   headers["X-Custom"] = "value"
 
-  let res = @halo.make_response(200, headers, None)
+  let res = Response::new_with(200, headers, None)
 
   let captured_headers : Ref[Array[(String, String)]] = { val: [] }
   let set_status_fn = fn(_status : Int) {  }

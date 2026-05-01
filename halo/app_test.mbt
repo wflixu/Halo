@@ -8,25 +8,25 @@ test "app can be created" {
 }
 
 ///|
-test "app.add_middleware adds middleware" {
+test "app.use adds middleware" {
   let app = App::new()
   let mw = fn(_ctx : Context, _next : Next) {  }
-  let app2 = app.add_middleware(mw)
+  let app2 = app.use(mw)
   assert_eq(app2.middleware_count(), 1)
 }
 
 ///|
-test "app.add_middleware supports chaining" {
+test "app.use supports chaining" {
   let app = App::new()
   let mw1 = fn(_ctx : Context, _next : Next) {  }
   let mw2 = fn(_ctx : Context, _next : Next) {  }
-  let app2 = app.add_middleware(mw1).add_middleware(mw2)
+  let app2 = app.use(mw1).use(mw2)
   assert_eq(app2.middleware_count(), 2)
 }
 
 ///|
-test "app.listen starts server" {
+test "app.callback creates handler function" {
   let app = App::new()
-  app.listen(":3000")
-  // This should not error
+  let _handler = app.callback()
+  // Handler should be a function (Request) -> Response
 }

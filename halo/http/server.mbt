@@ -1,30 +1,36 @@
-// src/halo/http/server.mbt
-// HTTP server wrapper for Halo web framework
+// halo/http/server.mbt
+// HTTP Server — wraps moonbitlang/async HTTP server
 
 ///|
-/// Server struct represents an HTTP server
+/// HTTP Server — wraps the moonbitlang/async HTTP server
 pub struct Server {
   address : String
 }
 
 ///|
-/// Create a new server with the given address
+/// Create a new Server bound to the given address string
+/// Accepts addresses like ":3000" (binds all interfaces) or "127.0.0.1:3000"
 pub fn Server::new(address : String) -> Server {
-  { address, }
+  let normalized = if address.has_prefix(":") {
+    "0.0.0.0" + address
+  } else {
+    address
+  }
+  { address: normalized }
 }
 
 ///|
-/// Get the server address
-pub fn Server::get_address(self : Server) -> String {
-  self.address
-}
-
-///|
-/// Start the server with the given handler function
-/// The handler takes a Request and returns a Response
-pub fn Server::start(_handler : (@halo.Request) -> @halo.Response) -> Unit {
-  // This is a simplified wrapper
-  // In a real implementation, this would use MoonBit's HTTP primitives
-  // to listen on the address and call the handler for each request
-  println("Starting server on {self.address}")
+/// Start the server with the given request handler
+/// The handler receives a Request and returns a Response.
+pub async fn Server::run_forever(
+  self : Server,
+  handler : (Request) -> Response,
+) -> Unit {
+  let addr = @socket.Addr::parse(self.address)
+  let server = @async_http.Server::new(addr)
+  server.run_forever((request, _body, conn) => {
+    let req = from_async(request)
+    let res = handler(req)
+    res.send(conn)
+  })
 }

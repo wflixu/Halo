@@ -7,7 +7,7 @@
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.body_parser())
+/// app.use(@middleware.body_parser())
 ///
 /// // In handler:
 /// let raw_body = ctx.state.get("body")

@@ -6,7 +6,7 @@
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.cookie_parser())
+/// app.use(@middleware.cookie_parser())
 ///
 /// // In handler:
 /// let session_id = ctx.state.get("cookie:session_id")

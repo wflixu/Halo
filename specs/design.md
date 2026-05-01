@@ -1,19 +1,20 @@
-# Halo v0.1 System Design
+# Halo — Architecture Design
 
 ## 1. Overview
 
-Halo 是一个基于 MoonBit 的现代 Web 框架，采用 Koa 风格的 Middleware 洋葱模型。
+Halo is a modern web framework for MoonBit, inspired by Koa's middleware onion model, built on MoonBit's native async runtime.
 
-**核心定位：**
-- 简洁（像 Koa）
-- 高性能（MoonBit 编译优化 + 原生 async）
-- Structured Concurrency（结构化并发）
+**Core Philosophy:**
+- Simple over configurable
+- Composition over inheritance
+- Streaming over buffering
+- Structured concurrency over callbacks
 
 ---
 
 ## 2. Architecture
 
-### 2.1 整体架构
+### 2.1 Overall Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -31,574 +32,351 @@ Halo 是一个基于 MoonBit 的现代 Web 框架，采用 Koa 风格的 Middlew
 │                      Context                             │
 │            (req, res, state per request)                 │
 ├─────────────────────────────────────────────────────────┤
-│                   HTTP Server Wrapper                    │
-│              (MoonBit native HTTP primitive)             │
+│                   halo/http                              │
+│         (Request, Response, Server — wraps async)        │
+├─────────────────────────────────────────────────────────┤
+│              moonbitlang/async/http|socket                │
+│                (Native HTTP/Socket primitives)            │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 请求生命周期
+### 2.2 Module Dependency Graph
 
 ```
-Request → Middleware[0].before
-        → Middleware[1].before
-        → Middleware[2].before
-        → Handler
-        → Middleware[2].after
-        → Middleware[1].after
-        → Middleware[0].after
-        → Response
+                    ┌──────────────┐
+                    │  halo/http   │────── depends on ──────► moonbitlang/async/http
+                    │  (HTTP层)    │                          moonbitlang/async/socket
+                    └──────┬───────┘
+                           │  imports
+                           ▼
+                    ┌──────────────┐
+                    │    halo      │
+                    │  (核心层)     │
+                    └──────┬───────┘
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
+   ┌────────────┐   ┌────────────┐   ┌────────────┐
+   │ middleware  │   │   router   │   │  helper    │
+   │  (中间件)   │   │   (路由)    │   │  (辅助)    │
+   └────────────┘   └────────────┘   └────────────┘
+                          │
+                          ▼
+                   ┌──────────────┐
+                   │   examples   │
+                   └──────────────┘
 ```
+
+### 2.3 Key Design Change (v0.6)
+
+**Before (v0.5):** `halo` 直接依赖 `moonbitlang/async/http|socket`，`halo/http` 是死代码。
+
+```
+moonbitlang/async/http|socket
+     ▲
+     │  direct import
+     │
+   halo        halo/http (dead code, unused)
+```
+
+**After (v0.6):** `halo/http` 包装 `moonbitlang/async`，`halo` 只依赖 `halo/http`。
+
+```
+moonbitlang/async/http|socket
+     ▲
+     │  wrapped by
+     │
+  halo/http  ──── defines ───► Request, Response, Server
+     ▲
+     │  imported by
+     │
+   halo      ──── uses ────► Context { req: @http.Request, res: Ref[@http.Response] }
+```
+
+**Rationale:**
+- `halo/http` 是 `moonbitlang/async/http` 的唯一包装层，屏蔽底层细节
+- `halo`（核心框架）不直接依赖 async 库，只依赖自己抽象的 `halo/http`
+- 如果将来切换底层 HTTP 实现，只改 `halo/http` 即可
+- 层次清晰，职责单一
 
 ---
 
 ## 3. Module Design
 
-### 3.1 Module Dependency Graph
+### 3.1 `halo/http` — HTTP Abstraction Layer
 
-```
-                    ┌─────────┐
-                    │  App    │
-                    └────┬────┘
-                         │
-         ┌───────────────┼───────────────┐
-         │               │               │
-         ▼               ▼               ▼
-   ┌──────────┐   ┌──────────┐   ┌──────────┐
-   │ Compose  │   │ Context  │   │   http/  │
-   └────┬─────┘   └────┬─────┘   └────┬─────┘
-        │              │              │
-        │              │              │
-        ▼              ▼              ▼
-   ┌─────────────────────────────────────┐
-   │            Types                     │
-   │  (Request, Response, Middleware)     │
-   └─────────────────────────────────────┘
-```
+**Responsibility:** Wrap `moonbitlang/async/http` and `moonbitlang/async/socket`, define Halo's own HTTP-level types.
 
-### 3.2 Module Responsibilities
+**Files:**
+- `request.mbt` — `Request` struct (method, path, headers, body) + `from_async()` conversion
+- `response.mbt` — `Response` struct (status, headers, body) + `send()` to connection
+- `server.mbt` — `Server` wrapper around `@async_http.Server`
+- `moon.pkg` — imports `moonbitlang/async/http` and `moonbitlang/async/socket`
 
-| Module | Responsibility |
-|--------|----------------|
-| `halo/types.mbt` | Core type definitions |
-| `halo/compose.mbt` | Middleware composition engine |
-| `halo/app.mbt` | Application entry point, middleware registration, listen() |
-| `halo/context.mbt` | Context helper methods |
+**No dependency on `halo` core.** This is a fundamental design rule — `halo/http` is independent and could theoretically be used standalone.
+
+### 3.2 `halo` — Framework Core
+
+**Responsibility:** Define the middleware system, types, and app infrastructure. Depends on `halo/http` for HTTP types and server.
+
+**Files:**
+- `types.mbt` — `Context`, `Next`, `Middleware` type definitions. Context references `@http.Request` and `@http.Response` (from `halo/http`).
+- `compose.mbt` — Onion model middleware composition (unchanged).
+- `app.mbt` — `App` struct, `use()` middleware registration, `callback()`, `listen()`.
+
+**Key Design Decisions:**
+- `add_middleware()` renamed to `use()` (Koa-compatible API)
+- `use()` returns `App` for chaining
+- `App::listen()` delegates entirely to `@http.Server`
+- No direct reference to `moonbitlang/async` anywhere in this layer
+
+### 3.3 `halo/middleware` — Built-in Middleware
+
+Unchanged in structure — each middleware is a file, all export factory functions returning `@halo.Middleware`.
+
+### 3.4 `halo/router` — Router Middleware
+
+Unchanged — router is just middleware. `Router::to_middleware()` returns `@halo.Middleware`.
+
+### 3.5 `halo/helper` — Helper Utilities
+
+Unchanged — provides utility functions like SSE helpers using `@halo.Context`.
 
 ---
 
-## 4. Interface Definitions
+## 4. Type Definitions
 
-### 4.1 Types
+### 4.1 `halo/http` Types
 
 ```moonbit
-// Core types
-type Next = fn() -> Future[Unit]
-type Middleware = fn(Context, Next) -> Future[Unit]
-
-struct Request {
-  method: String,
-  path: String,
-  headers: Map[String, String],
-  body: Option[String],
+// halo/http/request.mbt
+pub struct Request {
+  http_method: String
+  path: String
+  headers: Map[String, String]
+  body: String?
 }
 
-struct Response {
-  status: Int,
-  headers: Map[String, String],
-  body: Option[String],
-  body_stream: Option[Stream[String]],
+// halo/http/response.mbt
+pub struct Response {
+  status: Ref[Int]
+  headers: Ref[Map[String, String]]
+  body: Ref[String?]
 }
 
-struct Context {
-  req: Request,
-  res: Response,
-  state: Map[String, Any],
+// halo/http/server.mbt
+pub struct Server {
+  address: String  // stored as string, parsed in run_forever (async context)
 }
 ```
 
-### 4.2 App Interface
+### 4.2 `halo` Core Types
 
 ```moonbit
-struct App {
-  middlewares: List[Middleware],
+// halo/types.mbt
+pub struct Context {
+  req: Request         // = @http.Request from halo/http
+  res: Ref[Response]   // = @http.Response from halo/http
+  state: Map[String, String]
 }
 
-impl App {
-  fn new() -> Self
-  fn add_middleware(self, mw: Middleware) -> Self
-  fn listen(self, address: String) -> Unit
-}
+pub type Next = () -> Unit
+pub type Middleware = (Context, Next) -> Unit
 ```
 
-### 4.3 Context Interface
+### 4.3 Context Methods
 
 ```moonbit
+// Convenience methods on Context
 impl Context {
-  fn new(req: Request) -> Self
-  fn set_status(self, status: Int) -> Unit
   fn set_body(self, body: String) -> Unit
-  fn set_json(self, data: Json) -> Unit
-}
-```
-
-### 4.4 Compose Interface
-
-```moonbit
-fn compose(middlewares: List[Middleware]) -> Middleware
-// Returns a single middleware that executes the chain
-```
-
----
-
-## 5. Key Design Decisions
-
-### 5.1 Middleware Signature
-
-**Decision:** `fn(Context, Next) -> Future[Unit]`
-
-**Rationale:**
-- Context provides request/response encapsulation
-- Next as closure enables onion model
-- Future[Unit] for async composition
-
-### 5.2 Onion Model Implementation
-
-**Approach:** Right-to-left composition building
-
-```
-compose([mw1, mw2, mw3]) =
-  mw1(() => mw2(() => mw3(() => final_next)))
-```
-
-Each middleware wraps the next, creating nested execution.
-
-### 5.3 Context vs Direct Request/Response
-
-**Decision:** Encapsulate in Context struct
-
-**Rationale:**
-- Single object passed through middleware chain
-- State map for cross-middleware data sharing
-- Clean API surface
-
-### 5.4 Response Handling
-
-**Decision:** Support both buffered (text/json) and streaming
-
-```moonbit
-struct Response {
-  body: Option[String],       // Buffered
-  body_stream: Option[Stream], // Streaming
+  fn set_status(self, status: Int) -> Unit
+  fn set_json(self, json_str: String) -> Unit
+  fn get_header(self, name: String) -> String?
+  fn get_header_or(self, name: String, default: String) -> String
+  fn has_header(self, name: String) -> Bool
 }
 ```
 
 ---
 
-## 6. Data Flow
+## 5. API Design
 
-### 6.1 Request Processing
-
-```
-┌──────────────┐
-│ HTTP Request │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ @async/http  │ → request (native type)
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│wrap_from_http│ → Halo Request {method, path, headers, body}
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│   compose    │ → Execute middleware chain
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│send_to_conn  │ → Write to @async/http connection
-└──────────────┘
-```
-
-### 6.2 Middleware Execution Flow
-
-```
-compose([logger, auth, router])
-
-Execution:
-  logger.before
-    auth.before
-      router (handler)
-    auth.after
-  logger.after
-```
-
----
-
-## 7. Error Handling Strategy
-
-### 7.1 Error Propagation
-
-- Errors bubble up through middleware chain
-- Final error handler middleware catches all
-
-### 7.2 Error Handler Middleware
+### 5.1 App API (Koa-compatible)
 
 ```moonbit
-let error_handler = fn(ctx: Context, next: Next) async {
-  try {
-    next()
-  } catch err {
-    ctx.set_status(500)
-    ctx.set_json({"error": err.message})
-  }
-}
+// Create app
+let app = @halo.App::new()
 
-// Must be first middleware
-app.use(error_handler)
+// Register middleware — use() replaces add_middleware()
+app.use(@middleware.logger())
+app.use(@middleware.cors_allow_all())
+app.use(router.to_middleware())
+
+// Start server
+app.listen(":3000")  // or app.listen("127.0.0.1:3000")
 ```
 
----
-
-## 8. Performance Considerations
-
-### 8.1 Zero-Cost Abstractions
-
-- Middleware chain built once at startup
-- No runtime type checking
-- Direct function calls (no reflection)
-
-### 8.2 Streaming Support
-
-- Large responses use Stream, not buffered String
-- Prevents memory issues for big payloads
-
-### 8.3 Async Efficiency
-
-- MoonBit compiled async (no Promise overhead)
-- Structured concurrency for cancellation
-
----
-
-## 9. Extension Points
-
-### 9.1 Custom Middleware
-
-Users can write any middleware:
+### 5.2 `App::use()` Method
 
 ```moonbit
-let cors = fn(ctx: Context, next: Next) async {
-  ctx.res.headers["Access-Control-Allow-Origin"] = "*"
-  next()
+pub fn App::use(self : App, mw : @halo.Middleware) -> App {
+  let middlewares = self.middlewares
+  middlewares.push(mw)
+  { middlewares, }
 }
 ```
 
-### 9.2 Router (v0.2)
+Returns `App` for method chaining (consistent with router API).
 
-Router is just middleware:
+### 5.3 `App::listen()` — Delegates to `@http.Server`
 
 ```moonbit
-fn router(routes: Map[String, Handler]) -> Middleware {
-  fn(ctx: Context, next: Next) async {
-    match routes.get(ctx.req.path) {
-      Some(h) => h(ctx),
-      None => next(),
-    }
+pub async fn App::listen(self : App, address : String) -> Unit {
+  let handler = self.callback()
+  let server = @http.Server::new(address)
+  server.run_forever(handler)
+}
+```
+
+### 5.4 `App::callback()` — Returns Handler
+
+```moonbit
+pub fn App::callback(self : App) -> (@http.Request) -> @http.Response {
+  let composed = compose(self.middlewares)
+  fn(req : @http.Request) -> @http.Response {
+    let ctx = make_context_with_request(req)
+    composed(ctx, make_next())
+    ctx.res.val
   }
 }
 ```
 
-### 9.3 Future Adapters
+---
 
-- WASM adapter (edge runtimes)
-- Different HTTP backends
+## 6. Request Lifecycle
+
+```
+HTTP Request (from client)
+    │
+    ▼
+@async_http.Server            moonbitlang/async receives connection
+    │
+    ▼
+@http.Request::from_async()   halo/http converts to Halo Request
+    │
+    ▼
+App::callback()                halo creates Context, runs middleware chain
+    │
+    ▼
+Middleware[0].before
+    │
+    ▼
+Middleware[1].before
+    │
+    ▼
+... → Handler
+    │
+    ▼
+Middleware[1].after
+    │
+    ▼
+Middleware[0].after
+    │
+    ▼
+Response (from middleware chain)
+    │
+    ▼
+@http.Response::send()         halo/http sends response to connection
+    │
+    ▼
+HTTP Response (to client)
+```
 
 ---
 
-## 10. API Usage Example
+## 7. Module Interface Mapping
+
+### 7.1 `halo/http` Public API
 
 ```moonbit
-use halo/app
+// request.mbt
+pub struct Request
+pub fn Request::new(http_method, path, headers, body) -> Request
+pub fn from_async(raw: @async_http.Request) -> Request
 
-fn main {
-  let app = App::new()
+// response.mbt
+pub struct Response
+pub fn Response::new() -> Response
+pub fn Response::new_with(status, headers, body) -> Response
+pub async fn Response::send(self, conn: @async_http.ServerConnection) -> Unit
 
-  // Logger middleware
-  app.use(fn(ctx, next) async {
-    println("{ctx.req.method} {ctx.req.path}")
-    next()
-    println("Response: {ctx.res.status}")
-  })
+// server.mbt
+pub struct Server
+pub fn Server::new(address: String) -> Server
+pub async fn Server::run_forever(self, handler: (Request) -> Response) -> Unit
+```
 
-  // Simple router
-  app.use(fn(ctx, next) async {
-    match (ctx.req.method, ctx.req.path) {
-      ("GET", "/") => ctx.set_body("Hello"),
-      ("GET", "/json") => ctx.set_json({"msg": "Hi"}),
-      _ => {
-        ctx.set_status(404)
-        ctx.set_body("Not Found")
-      }
-    }
-  })
+### 7.2 `halo` Public API
 
-  app.listen(":3000")
-}
+```moonbit
+// types.mbt
+pub struct Context { req: @http.Request, res: Ref[@http.Response], state: Map[String, String] }
+pub type Next = () -> Unit
+pub type Middleware = (Context, Next) -> Unit
+
+// Context methods
+pub fn Context::set_body(self, body: String) -> Unit
+pub fn Context::set_status(self, status: Int) -> Unit
+pub fn Context::set_json(self, json_str: String) -> Unit
+pub fn Context::get_header(self, name: String) -> String?
+pub fn Context::get_header_or(self, name: String, default: String) -> String
+pub fn Context::has_header(self, name: String) -> Bool
+
+// Testing helpers
+pub fn make_context() -> Context
+pub fn make_next() -> Next
+pub fn make_request(http_method, path, headers, body) -> @http.Request
+pub fn make_response(status, headers, body) -> @http.Response
+pub fn make_context_with_request(req: @http.Request) -> Context
+
+// compose.mbt
+pub fn compose(middlewares: Array[Middleware]) -> Middleware
+
+// app.mbt
+pub struct App { middlewares: Array[Middleware] }
+pub fn App::new() -> App
+pub fn App::use(self, mw: Middleware) -> App
+pub fn App::middleware_count(self) -> Int
+pub fn App::callback(self) -> (@http.Request) -> @http.Response
+pub async fn App::listen(self, address: String) -> Unit
 ```
 
 ---
 
-## 11. Built-in Middleware Ecosystem
+## 8. Error Handling Strategy
 
-Halo 提供开箱即用的内置中间件，覆盖 80% 的常见 Web 开发需求。
+TODO: Improve `error_handler` middleware to properly catch panics.
 
-### 11.1 Middleware Layers
-
-| Layer | Version | Middleware | Description |
-|-------|---------|------------|-------------|
-| **Core** | v0.3 | `logger`, `error_handler`, `cors`, `static` | 每个应用都需要 |
-| **Common** | v0.4 | `body_parser`, `cookie`, `session`, `secure_headers` | 80% 应用需要 |
-| **Advanced** | v0.5+ | `rate_limit`, `compression`, `etag`, `request_id`, `auth_jwt` | 高级场景 |
-
-### 11.2 Middleware Directory Structure
-
-```
-halo/
-├── middleware/              # 内置中间件集合
-│   ├── moon.pkg
-│   ├── logger.mbt           # 请求日志
-│   ├── error_handler.mbt    # 统一错误处理
-│   ├── cors.mbt             # 跨域资源共享
-│   ├── static.mbt           # 静态文件服务
-│   ├── body_parser.mbt      # 请求体解析
-│   ├── cookie.mbt           # Cookie 解析
-│   ├── session.mbt          # 会话管理
-│   ├── secure_headers.mbt   # 安全响应头
-│   ├── rate_limit.mbt       # 请求限流
-│   └── compression.mbt      # 响应压缩
-```
-
-### 11.3 API Design Pattern
-
-```moonbit
-use halo/middleware
-
-// 零配置默认使用
-app.add_middleware(@middleware.logger())
-app.add_middleware(@middleware.error_handler())
-app.add_middleware(@middleware.cors())
-
-// 自定义配置
-app.add_middleware(@middleware.cors.allow_origins(["https://example.com"]))
-app.add_middleware(@middleware.static("./public", prefix="/assets"))
-app.add_middleware(@middleware.rate_limit.ip_based(100, 60))  // 100 次/分钟
-```
-
-### 11.4 Recommended Presets
-
-**最小化 API 模板：**
-```moonbit
-let app = App::new()
-app.add_middleware(@middleware.logger())
-app.add_middleware(@middleware.error_handler())
-app.add_middleware(@middleware.cors())
-app.add_middleware(router)
-```
-
-**完整 Web 应用模板：**
-```moonbit
-let app = App::new()
-
-// 基础中间件
-app.add_middleware(@middleware.logger())
-app.add_middleware(@middleware.error_handler())
-app.add_middleware(@middleware.cors())
-app.add_middleware(@middleware.secure_headers())
-
-// 请求处理
-app.add_middleware(@middleware.body_parser())
-app.add_middleware(@middleware.cookie_parser())
-app.add_middleware(@middleware.session())
-
-// 静态文件
-app.add_middleware(@middleware.static("./public"))
-
-// 路由
-app.add_middleware(router)
-```
-
-### 11.5 Design Principles
-
-1. **零配置可用** - 默认配置就能用
-2. **可组合** - 中间件可以叠加
-3. **类型安全** - 返回类型明确
-4. **性能优先** - 高频中间件（如 logger）要高效
-5. **不依赖外部库** - 全部内置，避免依赖地狱
+Current: `error_handler` is a no-op middleware that just invokes next() without try-catch.
+Target: In future versions, wrap `next()` in try-catch, return standardized JSON error responses.
 
 ---
 
-## 12. Server-Sent Events (SSE) Support
+## 9. Performance Considerations
 
-### 12.1 Overview
+- Middleware chain is built once at startup (`compose()` is called once in `callback()`)
+- `Ref` for Response allows mutation through shared reference
+- No dynamic dispatch — middleware stack is an `Array` of closures
+- `Server::run_forever` is `async` — the runtime handles concurrency
+- All types are stack-allocated, no heap allocations for request/response objects
 
-SSE (Server-Sent Events) 是一种单向服务器到客户端的实时通信协议，基于 HTTP，天然支持断线重连。
+---
 
-**使用场景：**
-- 实时通知推送
-- 股票行情/数据流
-- 构建日志/进度实时更新
-- AI 流式响应（如 LLM token 流）
+## 10. Future Considerations
 
-### 12.2 API Design
-
-```moonbit
-use halo/helper/sse
-
-// 方式 1: SSE Helper
-app.add_middleware(@helper.sse.emit(ctx, "notification", "{\"msg\": \"Hello\"}"))
-
-// 方式 2: Stream response
-app.add_middleware(fn(ctx, next) {
-  if ctx.req.path == "/stream" {
-    @helper.sse.set_headers(ctx)  // 设置 SSE 响应头
-    @helper.sse.send(ctx, "start", "{\"status\": \"connected\"}")
-    
-    // 流式发送事件
-    for i in 1..10 {
-      @helper.sse.send(ctx, "progress", "{\"count\": " + Int::to_string(i) + "}")
-    }
-    
-    @helper.sse.send(ctx, "end", "{\"status\": \"complete\"}")
-    return
-  }
-  next()
-})
-```
-
-### 12.3 SSE Response Format
-
-SSE 事件格式（每行一个字段，双换行分隔事件）：
-
-```
-event: notification
-data: {"msg": "Hello"}
-
-event: progress
-data: {"count": 1}
-id: 1
-retry: 3000
-```
-
-### 12.4 Module Design
-
-```
-halo/
-└── helper/
-    ├── moon.pkg
-    └── sse.mbt           # SSE helper functions
-```
-
-### 12.5 Core Functions
-
-```moonbit
-/// Set SSE response headers
-/// Content-Type: text/event-stream
-/// Cache-Control: no-cache
-/// Connection: keep-alive
-pub fn set_headers(ctx : Context) -> Unit
-
-/// Send SSE event with default event type "message"
-pub fn send(ctx : Context, data : String) -> Unit
-
-/// Send SSE event with custom event type
-pub fn send_event(ctx : Context, event : String, data : String) -> Unit
-
-/// Send SSE event with ID (for reconnection)
-pub fn send_with_id(ctx : Context, event : String, data : String, id : String) -> Unit
-
-/// Send SSE event with retry interval (milliseconds)
-pub fn send_with_retry(ctx : Context, event : String, data : String, retry_ms : Int) -> Unit
-
-/// Flush response buffer (ensure client receives immediately)
-pub fn flush(ctx : Context) -> Unit
-```
-
-### 12.6 Implementation Notes
-
-1. **流式响应** - SSE 需要流式支持，Response 需要 body_stream 字段
-2. **缓冲刷新** - 每次 send 后需要 flush 确保客户端立即收到
-3. **长连接** - SSE 是长连接，需要保持连接不被中间件截断
-4. **错误处理** - 客户端断线检测（可选）
-
-### 12.7 Usage Example
-
-```moonbit
-// examples/sse_demo.mbt
-use halo/app
-use halo/helper/sse
-
-fn main {
-  let app = @halo.App::new()
-
-  app.add_middleware(@middleware.logger())
-  app.add_middleware(@middleware.cors_allow_all())
-
-  // SSE endpoint
-  app.add_middleware(fn(ctx, _) {
-    if ctx.req.path == "/events" {
-      @helper.sse.set_headers(ctx)
-      @helper.flush(ctx)
-
-      let count = 5
-      let mut i = 0
-      while i < count {
-        let data = "{\"count\": " + Int::to_string(i) + "}"
-        @helper.sse.send_event(ctx, "progress", data)
-        @helper.flush(ctx)
-        i = i + 1
-      }
-
-      @helper.sse.send_event(ctx, "end", "{\"status\": \"done\"}")
-      return
-    }
-
-    // HTML page with EventSource
-    if ctx.req.path == "/" {
-      ctx.set_body(html_page())
-      return
-    }
-
-    ctx.set_status(404)
-  })
-
-  app.listen(":3000")
-}
-
-fn html_page() -> String {
-  \"\"\"
-  <!DOCTYPE html>
-  <html>
-  <body>
-    <div id="events"></div>
-    <script>
-      const es = new EventSource("/events");
-      es.onmessage = (e) => {
-        document.getElementById("events").innerHTML += e.data + "<br>";
-      };
-    </script>
-  </body>
-  </html>
-  \"\"\"
-}
-```
-
-### 12.8 Future Extensions
-
-1. **SSE Middleware** - 自动管理连接生命周期
-2. **Broadcast** - 多客户端广播支持
-3. **Room/Channel** - 房间/频道订阅模式
-4. **Reconnection** - 断线重连事件 ID 管理
+- **Streaming bodies**: Add `body_stream` field to Response for SSE/large payloads
+- **Typed state**: Type-safe `ctx.state` instead of `Map[String, String]`
+- **HTTP/2**: Support when `moonbitlang/async` adds it
+- **Better error handling**: First-class error handling middleware with try-catch

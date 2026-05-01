@@ -25,7 +25,7 @@ fn default_static_options() -> StaticOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.static_files("./public"))
+/// app.use(@middleware.static_files("./public"))
 /// ```
 pub fn static_files(root : String) -> @halo.Middleware {
   let opts = default_static_options()
@@ -42,7 +42,7 @@ pub fn static_files(root : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.static_with_prefix("./assets", "/static"))
+/// app.use(@middleware.static_with_prefix("./assets", "/static"))
 /// ```
 pub fn static_with_prefix(root : String, prefix : String) -> @halo.Middleware {
   let opts = default_static_options()
@@ -54,7 +54,7 @@ pub fn static_with_prefix(root : String, prefix : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.static_with_options({
+/// app.use(@middleware.static_with_options({
 ///   root: "./assets",
 ///   prefix: "/static",
 ///   cache: true,

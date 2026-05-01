@@ -26,7 +26,7 @@ fn default_cors_options() -> CorsOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.cors_allow_all())
+/// app.use(@middleware.cors_allow_all())
 /// ```
 pub fn cors_allow_all() -> @halo.Middleware {
   cors_with_options(default_cors_options())
@@ -37,7 +37,7 @@ pub fn cors_allow_all() -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.cors_allow_origins(["https://example.com"]))
+/// app.use(@middleware.cors_allow_origins(["https://example.com"]))
 /// ```
 pub fn cors_allow_origins(origins : Array[String]) -> @halo.Middleware {
   cors_with_options({

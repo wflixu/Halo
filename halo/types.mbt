@@ -1,28 +1,12 @@
-// src/halo/types.mbt
+// halo/types.mbt
 // Core type definitions for Halo web framework
-
-///|
-/// Request wrapper
-pub struct Request {
-  http_method : String
-  path : String
-  headers : Map[String, String]
-  body : String?
-}
-
-///|
-/// Response wrapper
-pub struct Response {
-  status : Ref[Int]
-  headers : Ref[Map[String, String]]
-  body : Ref[String?]
-}
+// Request and Response types are defined in halo/http, used here via @http
 
 ///|
 /// Context struct
 pub struct Context {
-  req : Request
-  res : Ref[Response]
+  req : @http.Request
+  res : Ref[@http.Response]
   state : Map[String, String]
 }
 
@@ -37,19 +21,8 @@ pub type Middleware = (Context, Next) -> Unit
 ///|
 /// Helper to create context for testing
 pub fn make_context() -> Context {
-  let req : Request = {
-    http_method: "GET",
-    path: "/",
-    headers: Map::new(),
-    body: None,
-  }
-  let res : Ref[Response] = {
-    val: {
-      status: { val: 200 },
-      headers: { val: Map::new() },
-      body: { val: None },
-    },
-  }
+  let req = @http.Request::new("GET", "/", Map::new(), None)
+  let res : Ref[@http.Response] = { val: @http.Response::new() }
   { req, res, state: Map::new() }
 }
 
@@ -66,8 +39,8 @@ pub fn make_request(
   path : String,
   headers : Map[String, String],
   body : String?,
-) -> Request {
-  { http_method, path, headers, body }
+) -> @http.Request {
+  @http.Request::new(http_method, path, headers, body)
 }
 
 ///|
@@ -76,21 +49,14 @@ pub fn make_response(
   status : Int,
   headers : Map[String, String],
   body : String?,
-) -> Response {
-  { status: { val: status }, headers: { val: headers }, body: { val: body } }
+) -> @http.Response {
+  @http.Response::new_with(status, headers, body)
 }
 
 ///|
 /// Helper to create context with custom request
-pub fn make_context_with_request(req : Request) -> Context {
-  let res : Ref[Response] = {
-    val: {
-      status: { val: 200 },
-      headers: { val: Map::new() },
-      body: { val: None },
-    },
-  }
-  { req, res, state: Map::new() }
+pub fn make_context_with_request(req : @http.Request) -> Context {
+  { req, res: { val: @http.Response::new() }, state: Map::new() }
 }
 
 ///|

@@ -30,7 +30,7 @@ fn default_timeout_options() -> TimeoutOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.timeout())
+/// app.use(@middleware.timeout())
 /// ```
 pub fn timeout() -> @halo.Middleware {
   timeout_with_options(default_timeout_options())
@@ -41,7 +41,7 @@ pub fn timeout() -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.timeout_with_options({
+/// app.use(@middleware.timeout_with_options({
 ///   timeout_ms: 5000,
 ///   error_message: "Request timed out",
 ///   status_code: 504,

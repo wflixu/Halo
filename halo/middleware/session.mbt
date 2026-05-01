@@ -20,7 +20,7 @@ fn default_session_options() -> SessionOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.session())
+/// app.use(@middleware.session())
 ///
 /// // In handler:
 /// let user_id = @middleware.session_get(ctx, "user_id")

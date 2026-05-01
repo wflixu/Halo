@@ -1,3 +1,6 @@
 import {
-  "wflixu/Halo/halo",
+  "moonbitlang/async/http" @async_http,
+  "moonbitlang/async/socket" @socket,
 }
+
+supported_targets = "native"

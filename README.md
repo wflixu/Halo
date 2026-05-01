@@ -9,11 +9,11 @@
 
 ## ✨ Features
 
-- **🧅 Onion Middleware** - Elegant before → next → after composition
-- **⚡ Native Async** - Compiler-level async/await (no Promise/await syntax)
-- **🧵 Structured Concurrency** - Automatic error propagation, request-scoped lifecycle
-- **🌊 Streaming First** - Responses are streams, not buffers
-- **🧩 Composable** - Everything is middleware
+- **Onion Middleware** - Elegant before → next → after composition
+- **Native Async** - Compiler-level async runtime (no await/callback syntax)
+- **Structured Concurrency** - Automatic error propagation, request-scoped lifecycle
+- **Streaming First** - Responses are streams, not buffers
+- **Composable** - Everything is middleware
 
 ## 🚀 Quick Start
 
@@ -40,10 +40,10 @@ async fn main {
   let app = @halo.App::new()
 
   // Logger middleware
-  app.add_middleware(@middleware.logger())
+  app.use(@middleware.logger())
 
   // Routes
-  app.add_middleware(fn(ctx, _) {
+  app.use(fn(ctx, _) {
     if ctx.req.path == "/" {
       ctx.set_body("Hello, Halo!")
     } else if ctx.req.path == "/json" {
@@ -71,18 +71,18 @@ async fn main {
   let app = @halo.App::new()
 
   // Core middleware
-  app.add_middleware(@middleware.logger())
-  app.add_middleware(@middleware.error_handler())
-  app.add_middleware(@middleware.cors_allow_all())
-  app.add_middleware(@middleware.secure_headers())
+  app.use(@middleware.logger())
+  app.use(@middleware.error_handler())
+  app.use(@middleware.cors_allow_all())
+  app.use(@middleware.secure_headers())
 
   // Request parsing
-  app.add_middleware(@middleware.body_parser())
-  app.add_middleware(@middleware.cookie_parser())
-  app.add_middleware(@middleware.session())
+  app.use(@middleware.body_parser())
+  app.use(@middleware.cookie_parser())
+  app.use(@middleware.session())
 
   // Static files
-  app.add_middleware(@middleware.static_files("./public"))
+  app.use(@middleware.static_files("./public"))
 
   // Router
   let router = @router.Router::new()
@@ -96,7 +96,7 @@ async fn main {
       ctx.set_body("Data received")
     })
 
-  app.add_middleware(router.to_middleware())
+  app.use(router.to_middleware())
 
   app.listen(":3000")
 }
@@ -132,16 +132,22 @@ async fn main {
 | **v0.3** | ✅ | Built-in middleware: logger, error_handler, cors, static |
 | **v0.4** | ✅ | body_parser, cookie_parser, session, secure_headers |
 | **v0.5** | ✅ | SSE, request_id, Bearer Token auth, rate limiting, compression, etag, timeout, JWT auth |
+| **v0.6** | ✅ | Architecture refactoring: `halo/http` wraps `moonbitlang/async`, `halo` → `halo/http` layered deps; Koa-style `app.use()` API |
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 wflixu/Halo/
 ├── moon.mod.json              # Module definition
-├── halo/                      # Core package
-│   ├── types.mbt             # Request, Response, Context, Middleware
-│   ├── compose.mbt            # Onion model composition
-│   ├── app.mbt               # App::new(), add_middleware(), listen()
+├── halo/http/                 # HTTP abstraction layer (wraps moonbitlang/async)
+│   ├── moon.pkg              # imports moonbitlang/async/http|socket
+│   ├── request.mbt           # Request type + from_async() conversion
+│   ├── response.mbt          # Response type + send() to connection
+│   └── server.mbt            # Server wrapper (new → run_forever)
+├── halo/                      # Framework core
+│   ├── types.mbt             # Context, Middleware, Next (uses @http.Request/Response)
+│   ├── compose.mbt           # Onion model composition
+│   ├── app.mbt               # App::new(), use(), listen()
 │   ├── context.mbt           # Context methods
 │   └── router/               # Router middleware
 │       ├── router.mbt         # HTTP method routing
@@ -152,19 +158,19 @@ wflixu/Halo/
 │   ├── error_handler.mbt     # Unified error handling
 │   ├── cors.mbt              # CORS support
 │   ├── static.mbt            # Static file serving
-│   ├── body_parser.mbt        # JSON/form body parsing
-│   ├── cookie_parser.mbt      # Cookie parsing
-│   ├── session.mbt            # Session management
-│   ├── secure_headers.mbt     # Security headers
-│   ├── request_id.mbt         # Request tracing ID
+│   ├── body_parser.mbt       # JSON/form body parsing
+│   ├── cookie_parser.mbt     # Cookie parsing
+│   ├── session.mbt           # Session management
+│   ├── secure_headers.mbt    # Security headers
+│   ├── request_id.mbt        # Request tracing ID
 │   ├── auth.mbt              # Bearer Token authentication
 │   ├── rate_limit.mbt        # Rate limiting (IP/user-based)
-│   ├── compression.mbt        # Response compression (gzip/brotli)
+│   ├── compression.mbt       # Response compression (gzip/brotli)
 │   ├── etag.mbt              # ETag generation for caching
-│   ├── timeout.mbt            # Request timeout handling
+│   ├── timeout.mbt           # Request timeout handling
 │   └── jwt_auth.mbt          # JWT token validation
 ├── halo/helper/              # Helpers
-│   └── sse.mbt                # Server-Sent Events
+│   └── sse.mbt               # Server-Sent Events
 ├── examples/                 # Examples
 │   ├── demo.mbt
 │   └── sse/
@@ -174,9 +180,9 @@ wflixu/Halo/
     └── router-design.md
 ```
 
-## 🧠 Middleware Model
+## Middleware Model
 
-Halo uses the classic onion model:
+Halo uses the classic onion model — every request passes through middleware layers before and after the handler:
 
 ```
 Request
@@ -194,7 +200,20 @@ Middleware 1 (after)
 Response
 ```
 
-## 🤝 Contributing
+### Dependency Flow
+
+```
+request → @async_http.Server
+              → @http.Request::from_async()     # convert to Halo Request
+                  → App::callback()              # run middleware chain
+                      → Context { req, res, state }
+                          → Middleware[0].before → next → Middleware[1].before → ... → Handler
+                          → Middleware[n].after ← ...
+                  ← Response
+              → @http.Response::send()          # send to connection
+```
+
+## Contributing
 
 Contributions welcome!
 

@@ -39,7 +39,7 @@ fn default_jwt_auth_options() -> JwtAuthOptions {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.jwt_auth("your-secret-key"))
+/// app.use(@middleware.jwt_auth("your-secret-key"))
 /// ```
 ///
 /// On missing or invalid token, returns 401 Unauthorized
@@ -60,7 +60,7 @@ pub fn jwt_auth(secret : String) -> @halo.Middleware {
 ///
 /// Example:
 /// ```moonbit nocheck
-/// app.add_middleware(@middleware.jwt_auth_with_options({
+/// app.use(@middleware.jwt_auth_with_options({
 ///   secret: "your-secret-key",
 ///   exclude: ["/public", "/health", "/api/webhook"],
 ///   error_message: "Invalid or expired token",
