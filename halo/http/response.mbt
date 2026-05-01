@@ -1,29 +1,5 @@
 // halo/http/response.mbt
-// HTTP Response type — defines the response abstraction for Halo
-
-///|
-/// HTTP Response type
-pub struct Response {
-  status : Ref[Int]
-  headers : Ref[Map[String, String]]
-  body : Ref[String?]
-}
-
-///|
-/// Create a new Response with default values (200 OK, empty headers, no body)
-pub fn Response::new() -> Response {
-  { status: { val: 200 }, headers: { val: Map::new() }, body: { val: None } }
-}
-
-///|
-/// Create a Response with specific values
-pub fn Response::new_with(
-  status : Int,
-  headers : Map[String, String],
-  body : String?,
-) -> Response {
-  { status: { val: status }, headers: { val: headers }, body: { val: body } }
-}
+// Native-only functions for sending Response to moonbitlang/async connections
 
 ///|
 /// Send this Response to an async HTTP connection

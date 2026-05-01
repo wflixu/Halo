@@ -3,4 +3,10 @@ import {
   "moonbitlang/async/socket" @socket,
 }
 
-supported_targets = "native"
+options(
+  targets: {
+    "request.mbt": ["native"],
+    "response.mbt": ["native"],
+    "server.mbt": ["native"],
+  },
+)

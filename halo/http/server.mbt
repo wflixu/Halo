@@ -1,23 +1,5 @@
 // halo/http/server.mbt
-// HTTP Server — wraps moonbitlang/async HTTP server
-
-///|
-/// HTTP Server — wraps the moonbitlang/async HTTP server
-pub struct Server {
-  address : String
-}
-
-///|
-/// Create a new Server bound to the given address string
-/// Accepts addresses like ":3000" (binds all interfaces) or "127.0.0.1:3000"
-pub fn Server::new(address : String) -> Server {
-  let normalized = if address.has_prefix(":") {
-    "0.0.0.0" + address
-  } else {
-    address
-  }
-  { address: normalized }
-}
+// Native-only HTTP server — wraps moonbitlang/async server
 
 ///|
 /// Start the server with the given request handler

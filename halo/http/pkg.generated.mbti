@@ -2,25 +2,39 @@
 package "wflixu/Halo/halo/http"
 
 import {
-  "wflixu/Halo/halo",
+  "moonbitlang/core/ref",
 }
 
 // Values
-pub fn apply_to_response(@halo.Response, (Int) -> Unit, (String, String) -> Unit, (String) -> Unit) -> Unit
+pub fn apply_to_response(Response, (Int) -> Unit, (String, String) -> Unit, (String) -> Unit) -> Unit
 
-pub fn wrap_request(String, String, Map[String, String], String?) -> @halo.Request
-
-pub fn wrap_response(Int, Map[String, String]) -> @halo.Response
+pub fn from_async(@moonbitlang/async/http.Request) -> Request
 
 // Errors
 
 // Types and methods
+pub struct Request {
+  http_method : String
+  path : String
+  headers : Map[String, String]
+  body : String?
+}
+pub fn Request::new(String, String, Map[String, String], String?) -> Self
+
+pub struct Response {
+  status : @ref.Ref[Int]
+  headers : @ref.Ref[Map[String, String]]
+  body : @ref.Ref[String?]
+}
+pub fn Response::new() -> Self
+pub fn Response::new_with(Int, Map[String, String], String?) -> Self
+pub async fn Response::send(Self, @moonbitlang/async/http.ServerConnection) -> Unit
+
 pub struct Server {
   address : String
 }
-pub fn Server::get_address(Self) -> String
 pub fn Server::new(String) -> Self
-pub fn Server::start((@halo.Request) -> @halo.Response) -> Unit
+pub async fn Server::run_forever(Self, (Request) -> Response) -> Unit
 
 // Type aliases
 

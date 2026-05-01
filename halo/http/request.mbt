@@ -1,25 +1,5 @@
 // halo/http/request.mbt
-// HTTP Request type — the low-level HTTP abstraction for Halo
-
-///|
-/// Low-level HTTP Request type
-pub struct Request {
-  http_method : String
-  path : String
-  headers : Map[String, String]
-  body : String?
-}
-
-///|
-/// Create a Request from raw values
-pub fn Request::new(
-  http_method : String,
-  path : String,
-  headers : Map[String, String],
-  body : String?,
-) -> Request {
-  { http_method, path, headers, body }
-}
+// Native-only conversion from moonbitlang/async types to Halo Request
 
 ///|
 /// Convert from @async_http.Request (moonbitlang/async) to Halo Request

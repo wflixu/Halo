@@ -1,6 +1,7 @@
 {
   "name": "wflixu/Halo",
   "version": "0.6.0",
+  "preferred-target": "native",
   "deps": {
     "moonbitlang/async": "0.18.1"
   },

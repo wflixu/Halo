@@ -2,4 +2,8 @@ import {
   "wflixu/Halo/halo/http" @http,
 }
 
-supported_targets = "native"
+options(
+  targets: {
+    "app.mbt": ["native"],
+  },
+)
